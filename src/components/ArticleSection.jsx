@@ -1,14 +1,46 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import searchIcon from '@/assets/Search_light.png'
+import { BlogCat } from '@/components/BlogCat'
+import { additionalBlogs, initialBlogs } from '@/data/blogs'
 
-const categories = ['Highlight', 'Cat', 'Inspiration', 'Ganeral']
+const categories = ['Highlight', 'Cat', 'Inspiration', 'General']
 
 const searchInputClassName =
   'w-full rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-11 pl-4 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B] md:py-3 md:text-base'
 
 export function ArticleSection() {
   const [selectedCategory, setSelectedCategory] = useState('Highlight')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [loadedBlogs, setLoadedBlogs] = useState(initialBlogs)
+
+  const filteredBlogs = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    return loadedBlogs.filter((blog) => {
+      const matchesCategory =
+        selectedCategory === 'Highlight' || blog.category === selectedCategory
+
+      const matchesSearch =
+        !query ||
+        blog.tag.toLowerCase().includes(query) ||
+        blog.title.toLowerCase().includes(query) ||
+        blog.excerpt.toLowerCase().includes(query)
+
+      return matchesCategory && matchesSearch
+    })
+  }, [loadedBlogs, selectedCategory, searchQuery])
+
+  const hasMore = loadedBlogs.length < initialBlogs.length + additionalBlogs.length
+
+  function handleViewMore() {
+    setLoadedBlogs((current) => [...current, ...additionalBlogs])
+  }
+
+  function handleTagClick(tag) {
+    setSelectedCategory(tag)
+    setSearchQuery('')
+  }
 
   return (
     <section className="bg-background">
@@ -23,6 +55,8 @@ export function ArticleSection() {
               <input
                 type="search"
                 placeholder="Search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className={searchInputClassName}
               />
               <img
@@ -86,6 +120,8 @@ export function ArticleSection() {
               <input
                 type="search"
                 placeholder="Search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className={searchInputClassName}
               />
               <img
@@ -96,6 +132,13 @@ export function ArticleSection() {
             </div>
           </div>
         </div>
+
+        <BlogCat
+          blogs={filteredBlogs}
+          hasMore={hasMore}
+          onViewMore={handleViewMore}
+          onTagClick={handleTagClick}
+        />
       </div>
     </section>
   )
