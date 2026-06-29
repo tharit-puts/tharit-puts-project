@@ -196,3 +196,9 @@ export const additionalBlogs = [
     date: '10 October 2024',
   },
 ]
+
+export const allBlogs = [...initialBlogs, ...additionalBlogs]
+
+export function getBlogById(id) {
+  return allBlogs.find((blog) => blog.id === Number(id))
+}

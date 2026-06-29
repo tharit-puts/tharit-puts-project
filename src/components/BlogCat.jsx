@@ -8,6 +8,7 @@ export function BlogCat({ blogs, onViewMore, hasMore, onTagClick }) {
           {blogs.map((blog) => (
             <BlogCard
               key={blog.id}
+              id={blog.id}
               image={blog.image}
               tag={blog.tag}
               title={blog.title}

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import linkedInIcon from '@/assets/LinkedIN_black.png'
 import githubIcon from '@/assets/Github_black.png'
 import googleIcon from '@/assets/Google_black.png'
@@ -30,12 +31,12 @@ export function Footer() {
           </div>
         </div>
 
-        <a
-          href="/"
+        <Link
+          to="/"
           className="text-sm font-medium text-foreground underline underline-offset-4 md:text-base"
         >
           Home page
-        </a>
+        </Link>
       </div>
     </footer>
   )
