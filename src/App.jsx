@@ -4,6 +4,8 @@ import { Footer } from '@/components/Footer'
 import { ScrollToTop } from '@/components/ScrollToTop'
 import { HomePage } from '@/pages/HomePage'
 import { BlogDetailPage } from '@/pages/BlogDetailPage'
+import { LoginPage } from '@/pages/LoginPage'
+import { SignUpPage } from '@/pages/SignUpPage'
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
           }
         />
         <Route path="/post/:id" element={<BlogDetailPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
       </Routes>
     </BrowserRouter>
   )

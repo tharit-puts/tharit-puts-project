@@ -1,6 +1,6 @@
 import { BlogCard } from '@/components/BlogCard'
 
-export function BlogCat({ blogs, onViewMore, hasMore, onTagClick }) {
+export function BlogCat({ blogs, onViewMore, hasMore, isViewMoreLoading, onTagClick }) {
   return (
     <div className="mt-10">
       {blogs.length > 0 ? (
@@ -30,9 +30,10 @@ export function BlogCat({ blogs, onViewMore, hasMore, onTagClick }) {
           <button
             type="button"
             onClick={onViewMore}
-            className="text-base font-medium text-foreground underline underline-offset-4 transition-colors hover:text-[#75716B]"
+            disabled={isViewMoreLoading}
+            className="text-base font-medium text-foreground underline underline-offset-4 transition-colors hover:text-[#75716B] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            View more
+            {isViewMoreLoading ? 'Loading...' : 'View more'}
           </button>
         </div>
       )}

@@ -1,8 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import searchIcon from '@/assets/Search_light.png'
 import { BlogCat } from '@/components/BlogCat'
+import { Loading } from '@/components/Loading'
 import { additionalBlogs, initialBlogs } from '@/data/blogs'
+import { LOADING_DELAY, wait } from '@/lib/loading'
 
 const categories = ['Highlight', 'Cat', 'Inspiration', 'General']
 
@@ -12,34 +14,59 @@ const searchInputClassName =
 export function ArticleSection() {
   const [selectedCategory, setSelectedCategory] = useState('Highlight')
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [loadedBlogs, setLoadedBlogs] = useState(initialBlogs)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isViewMoreLoading, setIsViewMoreLoading] = useState(false)
 
-  const filteredBlogs = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
+  useEffect(() => {
+    setIsLoading(true)
 
-    return loadedBlogs.filter((blog) => {
-      const matchesCategory =
-        selectedCategory === 'Highlight' || blog.category === selectedCategory
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      setIsLoading(false)
+    }, LOADING_DELAY.search)
 
-      const matchesSearch =
-        !query ||
-        blog.tag.toLowerCase().includes(query) ||
-        blog.title.toLowerCase().includes(query) ||
-        blog.excerpt.toLowerCase().includes(query)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
-      return matchesCategory && matchesSearch
-    })
-  }, [loadedBlogs, selectedCategory, searchQuery])
+  const filteredBlogs = loadedBlogs.filter((blog) => {
+    const query = debouncedSearch.trim().toLowerCase()
+
+    const matchesCategory =
+      selectedCategory === 'Highlight' || blog.category === selectedCategory
+
+    const matchesSearch =
+      !query ||
+      blog.tag.toLowerCase().includes(query) ||
+      blog.title.toLowerCase().includes(query) ||
+      blog.excerpt.toLowerCase().includes(query)
+
+    return matchesCategory && matchesSearch
+  })
 
   const hasMore = loadedBlogs.length < initialBlogs.length + additionalBlogs.length
 
-  function handleViewMore() {
+  async function handleViewMore() {
+    setIsViewMoreLoading(true)
+    await wait(LOADING_DELAY.viewMore)
     setLoadedBlogs((current) => [...current, ...additionalBlogs])
+    setIsViewMoreLoading(false)
+  }
+
+  function handleCategoryChange(category) {
+    if (category === selectedCategory) return
+
+    setIsLoading(true)
+    setSelectedCategory(category)
+
+    setTimeout(() => setIsLoading(false), LOADING_DELAY.filter)
   }
 
   function handleTagClick(tag) {
-    setSelectedCategory(tag)
     setSearchQuery('')
+    setDebouncedSearch('')
+    handleCategoryChange(tag)
   }
 
   return (
@@ -77,8 +104,9 @@ export function ArticleSection() {
                 <select
                   id="category-select"
                   value={selectedCategory}
-                  onChange={(event) => setSelectedCategory(event.target.value)}
-                  className="w-full appearance-none rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-10 pl-4 text-sm font-medium text-[#43403B] outline-none focus:border-[#75716B]"
+                  onChange={(event) => handleCategoryChange(event.target.value)}
+                  disabled={isLoading}
+                  className="w-full appearance-none rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-10 pl-4 text-sm font-medium text-[#43403B] outline-none focus:border-[#75716B] disabled:opacity-60"
                 >
                   {categories.map((category) => (
                     <option key={category} value={category}>
@@ -103,8 +131,9 @@ export function ArticleSection() {
                   <button
                     key={category}
                     type="button"
-                    onClick={() => setSelectedCategory(category)}
-                    className={`rounded-full px-5 py-2.5 text-base font-medium transition-colors ${
+                    onClick={() => handleCategoryChange(category)}
+                    disabled={isLoading}
+                    className={`rounded-full px-5 py-2.5 text-base font-medium transition-colors disabled:opacity-60 ${
                       isSelected
                         ? 'bg-[#DAD6D1] text-[#43403B]'
                         : 'text-[#75716B] hover:text-[#43403B]'
@@ -133,12 +162,17 @@ export function ArticleSection() {
           </div>
         </div>
 
-        <BlogCat
-          blogs={filteredBlogs}
-          hasMore={hasMore}
-          onViewMore={handleViewMore}
-          onTagClick={handleTagClick}
-        />
+        {isLoading ? (
+          <Loading className="py-24" />
+        ) : (
+          <BlogCat
+            blogs={filteredBlogs}
+            hasMore={hasMore}
+            isViewMoreLoading={isViewMoreLoading}
+            onViewMore={handleViewMore}
+            onTagClick={handleTagClick}
+          />
+        )}
       </div>
     </section>
   )

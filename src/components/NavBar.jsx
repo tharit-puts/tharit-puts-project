@@ -11,12 +11,16 @@ export function NavBar() {
           </Link>
   
           <nav className="flex items-center gap-3">
-            <Button variant="outline" className="rounded-full border-[#75716B] px-8 py-5">
-              Log in
-            </Button>
-            <Button className="rounded-full px-8 py-5 font-light">
-              Sign up
-            </Button>
+            <Link to="/login">
+              <Button variant="outline" className="rounded-full border-[#75716B] px-8 py-5">
+                Log in
+              </Button>
+            </Link>
+            <Link to="/signup">
+              <Button className="rounded-full px-8 py-5 font-light">
+                Sign up
+              </Button>
+            </Link>
           </nav>
         </div>
       </header>
