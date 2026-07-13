@@ -1,3 +1,4 @@
+// ข้อความ Loading กลางหน้า — ใช้ตอนรอข้อมูลหรือเปลี่ยนหน้า
 export function Loading({ className = '' }) {
   return (
     <p

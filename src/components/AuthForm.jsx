@@ -1,6 +1,10 @@
+// ชิ้นส่วน UI ร่วมสำหรับหน้า Login และ Sign up
+
+// style ของ input ทุกช่องในฟอร์ม auth
 const inputClassName =
   'w-full rounded-xl border border-[#DAD6D1] bg-white px-4 py-3 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B]'
 
+// ช่องกรอกข้อมูล 1 ช่อง (มี label + input)
 export function AuthInput({ id, label, type = 'text', placeholder }) {
   return (
     <div>
@@ -17,6 +21,7 @@ export function AuthInput({ id, label, type = 'text', placeholder }) {
   )
 }
 
+// กล่องครอบฟอร์มทั้งหมด พร้อมหัวข้อตรงกลาง
 export function AuthFormCard({ title, children }) {
   return (
     <div className="mx-auto w-full max-w-md rounded-2xl bg-[#EFEEEB] px-8 py-10">

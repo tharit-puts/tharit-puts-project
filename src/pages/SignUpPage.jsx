@@ -1,3 +1,4 @@
+// หน้า Sign up — แสดงฟอร์มสมัครสมาชิก พร้อมลิงก์ไป Log in
 import { Link, useLocation } from 'react-router-dom'
 import { NavBar } from '@/components/NavBar'
 import { AuthFormCard, AuthInput } from '@/components/AuthForm'
@@ -7,6 +8,8 @@ import { usePageLoading } from '@/hooks/usePageLoading'
 
 export function SignUpPage() {
   const location = useLocation()
+
+  // แสดง Loading ชั่วคราวทุกครั้งที่เข้าหน้านี้
   const isLoading = usePageLoading([location.pathname])
 
   return (
@@ -19,7 +22,9 @@ export function SignUpPage() {
         </main>
       ) : (
         <main className="mx-auto flex max-w-6xl justify-center px-6 py-16 md:px-10 md:py-24">
+          {/* title คือ หัวข้อของฟอร์ม */}
           <AuthFormCard title="Sign up">
+            {/*children คือ ส่วนของฟอร์มที่จะถูกแสดงผล*/}
             <AuthInput id="name" label="Name" placeholder="Full name" />
             <AuthInput id="username" label="Username" placeholder="Username" />
             <AuthInput id="email" label="Email" placeholder="Email" />

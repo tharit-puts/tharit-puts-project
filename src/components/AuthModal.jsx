@@ -1,9 +1,11 @@
+// Modal แจ้งให้สมัครสมาชิกก่อน comment — มีปุ่มไปหน้า Sign up / Log in
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function AuthModal({ open, onClose }) {
+  // ตอน modal เปิด: ล็อก scroll หน้าหลัง และกด Escape เพื่อปิดได้
   useEffect(() => {
     if (!open) return
 
@@ -20,14 +22,17 @@ export function AuthModal({ open, onClose }) {
     }
   }, [open, onClose])
 
+  // ถ้ายังไม่เปิด modal ไม่ต้อง render อะไร
   if (!open) return null
 
   return (
+    // พื้นหลังมืด — กดที่ว่างเพื่อปิด modal
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
       onClick={onClose}
       role="presentation"
     >
+      {/* กล่อง modal ตรงกลาง */}
       <div
         role="dialog"
         aria-modal="true"

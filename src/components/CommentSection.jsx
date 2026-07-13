@@ -1,6 +1,8 @@
+// ส่วน comment — กดช่องพิมพ์แล้วเปิด modal ให้สมัคร/เข้าสู่ระบบก่อน
 import { useState } from 'react'
 import { AuthModal } from '@/components/AuthModal'
 
+// สีพื้นหลัง avatar ตามตัวอักษรแรกของชื่อ
 const avatarColors = [
   'bg-[#D7F2E9] text-[#128279]',
   'bg-[#FFE8D6] text-[#C45C00]',
@@ -9,6 +11,7 @@ const avatarColors = [
   'bg-[#FFD6E0] text-[#AA0044]',
 ]
 
+// วงกลมแสดงตัวอักษรแรกของชื่อคอมเมนต์
 function CommentAvatar({ name }) {
   const colorIndex = name.charCodeAt(0) % avatarColors.length
   const initial = name.charAt(0).toUpperCase()
@@ -22,6 +25,7 @@ function CommentAvatar({ name }) {
   )
 }
 
+// คอมเมนต์ 1 รายการ
 function CommentItem({ name, text, date }) {
   return (
     <div className="flex gap-4 border-b border-[#DAD6D1] py-6 last:border-b-0">
@@ -36,6 +40,7 @@ function CommentItem({ name, text, date }) {
 }
 
 export function CommentSection({ initialComments }) {
+  // เปิด/ปิด modal สมัครสมาชิก
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   return (
@@ -44,6 +49,8 @@ export function CommentSection({ initialComments }) {
         <label htmlFor="comment" className="text-sm font-medium text-[#75716B]">
           Comment
         </label>
+
+        {/* ไม่ให้พิมพ์ได้ทันที — กดแล้วเด้ง modal ให้ login/signup */}
         <button
           type="button"
           id="comment"
@@ -54,6 +61,7 @@ export function CommentSection({ initialComments }) {
         </button>
       </div>
 
+      {/* แสดงคอมเมนต์ตัวอย่างที่เตรียมไว้ */}
       <div className="mt-6">
         {initialComments.map((comment) => (
           <CommentItem

@@ -1,10 +1,9 @@
+// กล่องข้อมูลผู้เขียน — ใช้ในหน้า blog detail ด้านขวา (sticky บน desktop)
 import authorAvatar from '@/assets/man-with-cat.jpg'
 
 export function AuthorCard({ className = '' }) {
   return (
-    <div
-      className={`rounded-2xl bg-[#EFEEEB] p-6 ${className}`}
-    >
+    <div className={`rounded-2xl bg-[#EFEEEB] p-6 ${className}`}>
       <img
         src={authorAvatar}
         alt="Thompson P."

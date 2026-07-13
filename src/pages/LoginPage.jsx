@@ -1,3 +1,4 @@
+// หน้า Log in — แสดงฟอร์มอีเมล/รหัสผ่าน พร้อมลิงก์ไป Sign up
 import { Link, useLocation } from 'react-router-dom'
 import { NavBar } from '@/components/NavBar'
 import { AuthFormCard, AuthInput } from '@/components/AuthForm'
@@ -7,6 +8,8 @@ import { usePageLoading } from '@/hooks/usePageLoading'
 
 export function LoginPage() {
   const location = useLocation()
+
+  // แสดง Loading ชั่วคราวทุกครั้งที่เข้าหน้านี้
   const isLoading = usePageLoading([location.pathname])
 
   return (
@@ -19,7 +22,9 @@ export function LoginPage() {
         </main>
       ) : (
         <main className="mx-auto flex max-w-6xl justify-center px-6 py-16 md:px-10 md:py-24">
-          <AuthFormCard title="Log in">
+          {/* title คือ หัวข้อของฟอร์ม */}
+          <AuthFormCard title="Log in"> 
+            {/*children คือ ส่วนของฟอร์มที่จะถูกแสดงผล*/}
             <AuthInput id="email" label="Email" placeholder="Email" />
             <AuthInput
               id="password"
@@ -46,7 +51,7 @@ export function LoginPage() {
             </p>
           </AuthFormCard>
         </main>
-      )}
+      )}  
     </div>
   )
 }

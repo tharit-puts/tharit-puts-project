@@ -1,3 +1,4 @@
+// หน้าอ่านบทความเต็ม — ดึงข้อมูลจาก id ใน URL แล้วแสดงเนื้อหา + comment
 import { Navigate, useParams } from 'react-router-dom'
 import { NavBar } from '@/components/NavBar'
 import { Footer } from '@/components/Footer'
@@ -11,14 +12,21 @@ import { getBlogDetail } from '@/data/blogDetails'
 import { usePageLoading } from '@/hooks/usePageLoading'
 
 export function BlogDetailPage() {
+  // อ่านเลข id จาก URL เช่น /post/3 -> id = "3"
   const { id } = useParams()
+
+  // หาข้อมูลบทความจากไฟล์ข้อมูลตาม id
   const blog = getBlogById(id)
+
+  // แสดง Loading ชั่วคราวตอนเข้าหน้านี้หรือเปลี่ยน id
   const isLoading = usePageLoading([id])
 
+  // ถ้าไม่เจอบทความ ส่งกลับหน้าแรก
   if (!blog) {
     return <Navigate to="/" replace />
   }
 
+  // ดึงเนื้อหาเต็ม comment ตัวอย่าง และยอด emotion
   const detail = getBlogDetail(blog)
 
   return (
@@ -31,6 +39,7 @@ export function BlogDetailPage() {
         </main>
       ) : (
         <main className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-16">
+          {/* layout 2 คอลัมน์: เนื้อหาหลัก + author card ด้านขวา */}
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-12">
             <article>
               <img
@@ -52,6 +61,7 @@ export function BlogDetailPage() {
                 {blog.title}
               </h1>
 
+              {/* มือถือ: แสดง author card ใต้หัวข้อ */}
               <div className="mt-8 lg:hidden">
                 <AuthorCard />
               </div>
@@ -67,6 +77,7 @@ export function BlogDetailPage() {
               <CommentSection initialComments={detail.comments} />
             </article>
 
+            {/* desktop: author card ติดขวาและเลื่อนตามจอ */}
             <aside className="hidden lg:block">
               <AuthorCard className="sticky top-24" />
             </aside>
