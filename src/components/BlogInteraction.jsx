@@ -1,6 +1,7 @@
 // แถบปุ่มโต้ตอบใต้บทความ — emotion, copy link, แชร์โซเชียล
 import { useState } from 'react'
 import { Copy, Smile } from 'lucide-react'
+import { toast } from 'sonner'
 import twitterIcon from '@/assets/colorTwitter.png'
 import linkedinIcon from '@/assets/colorLinkedin.png'
 import facebookIcon from '@/assets/colorFacebook.png'
@@ -19,9 +20,6 @@ export function BlogInteraction({ initialCount }) {
   // กันกด emotion ซ้ำได้แค่ครั้งเดียวต่อการเข้าหน้า
   const [hasReacted, setHasReacted] = useState(false)
 
-  // สถานะว่าคัดลอกลิงก์สำเร็จหรือยัง
-  const [copied, setCopied] = useState(false)
-
   function handleEmotionClick() {
     if (!hasReacted) {
       setEmotionCount((count) => count + 1)
@@ -29,11 +27,13 @@ export function BlogInteraction({ initialCount }) {
     }
   }
 
-  // คัดลอก URL ปัจจุบันไปยัง clipboard
+  // คัดลอก URL ปัจจุบันไปยัง clipboard แล้วแจ้งเตือนด้านขวาล่าง
   async function handleCopyLink() {
     await navigator.clipboard.writeText(window.location.href)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    toast.success('Copied!', {
+      description: 'This article has been copied to your clipboard.',
+      icon: null,
+    })
   }
 
   return (
@@ -53,7 +53,7 @@ export function BlogInteraction({ initialCount }) {
         className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-medium text-[#43403B] transition-colors hover:bg-[#F9F8F6]"
       >
         <Copy className="h-4 w-4" />
-        {copied ? 'Copied!' : 'Copy link'}
+        Copy link
       </button>
 
       <div className="flex items-center gap-3">
