@@ -1,11 +1,9 @@
-// ส่วน Latest articles — จัดการ filter, search, view more และส่งข้อมูลให้ BlogCat แสดงผล
 import { useEffect, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import searchIcon from '@/assets/Search_light.png'
 import { BlogCat } from '@/components/BlogCat'
 import { Loading } from '@/components/Loading'
-import { additionalBlogs, initialBlogs } from '@/data/blogs'
-import { LOADING_DELAY, wait } from '@/lib/loading'
+import { fetchPosts } from '@/services/postsApi'
 
 // รายชื่อหมวดหมู่ที่ให้ผู้ใช้เลือกกรอง
 const categories = ['Highlight', 'Cat', 'Inspiration', 'General']
@@ -14,79 +12,78 @@ const categories = ['Highlight', 'Cat', 'Inspiration', 'General']
 const searchInputClassName =
   'w-full rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-11 pl-4 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B] md:py-3 md:text-base'
 
+const SEARCH_DEBOUNCE_MS = 500
+
 export function ArticleSection() {
-  // หมวดที่เลือกอยู่ตอนนี้ (Highlight = แสดงทุกหมวด)
-  const [selectedCategory, setSelectedCategory] = useState('Highlight')
-
-  // คำที่ผู้ใช้พิมพ์ในช่อง search ทันที หรือ สิ่งที่กำลังพิมพ์
+  const [posts, setPosts] = useState([])
+  const [page, setPage] = useState(1)
+  const [category, setCategory] = useState('Highlight')
   const [searchQuery, setSearchQuery] = useState('')
+  const [keyword, setKeyword] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [hasMore, setHasMore] = useState(true)
 
-  // คำค้นหาหลังรอ debounce แล้ว ใช้จริงตอนกรองข้อมูล
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-
-  // บทความที่โหลดมาแล้วทั้งหมด (เริ่มจาก 6 รายการแรก)
-  const [loadedBlogs, setLoadedBlogs] = useState(initialBlogs)
-
-  // กำลังโหลดตอนเปลี่ยนหมวดหรือค้นหา
-  const [isLoading, setIsLoading] = useState(false)
-
-  // กำลังโหลดตอนกด View more
-  const [isViewMoreLoading, setIsViewMoreLoading] = useState(false)
-
-  // รอให้ผู้ใช้พิมพ์หยุดก่อน แล้วค่อยอัปเดตคำค้นหาที่ใช้กรองจริง
   useEffect(() => {
-    setIsLoading(true) // เริ่มกำลังโหลด
+    const timer = setTimeout(() => {
+      setKeyword(searchQuery)
+    }, SEARCH_DEBOUNCE_MS)
 
-    const timer = setTimeout(() => { // รอจนกว่าจะผ่านระยะเวลา LOADING_DELAY.search ก่อนที่จะอัปเดตคำค้นหาหลังรอ debounce แล้ว
-      setDebouncedSearch(searchQuery) // อัปเดตคำค้นหาหลังรอ debounce แล้ว
-      setIsLoading(false) // หยุดกำลังโหลด
-    }, LOADING_DELAY.search)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
-    return () => clearTimeout(timer) // ล้าง timeout เมื่อ component unmount
-  }, [searchQuery]) // รอกดปุ่ม search หรือ กดปุ่ม enter ในช่อง search ก่อนที่จะอัปเดตคำค้นหาหลังรอ debounce แล้ว
+  useEffect(() => {
+    async function loadPosts() {
+      setIsLoading(true)
 
-  // กรองบทความตามหมวดและคำค้นหา
-  const filteredBlogs = loadedBlogs.filter((blog) => {
-    const query = debouncedSearch.trim().toLowerCase()
+      try {
+        const data = await fetchPosts({ page, category, keyword })
 
-    const matchesCategory = //แสดง blog ที่มี category ตรงกับหมวดที่เลือก
-      selectedCategory === 'Highlight' || blog.category === selectedCategory 
+        setPosts((prev) =>
+          page === 1 ? data.posts : [...prev, ...data.posts],
+        )
 
-    const matchesSearch = //แสดง blog ที่มี tag, title, excerpt ตรงกับคำค้นหา
-      !query || 
-      blog.tag.toLowerCase().includes(query) || 
-      blog.title.toLowerCase().includes(query) || 
-      blog.excerpt.toLowerCase().includes(query) 
+        setHasMore(data.currentPage < data.totalPages)
+      } catch (error) {
+        console.error('Failed to fetch posts:', error)
 
-    return matchesCategory && matchesSearch
-  })
+        if (page === 1) {
+          setPosts([])
+        }
 
-  // ยังโหลดบทความเพิ่มได้อีกไหม (เทียบกับจำนวนทั้งหมดที่มีในไฟล์ข้อมูล)
-  const hasMore = loadedBlogs.length < initialBlogs.length + additionalBlogs.length
+        setHasMore(false)
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-  // กด View more = รอสักครู่แล้วเอาบทความ 10 รายการถัดไปมาต่อท้าย
-  async function handleViewMore() {
-    setIsViewMoreLoading(true)
-    await wait(LOADING_DELAY.viewMore)
-    setLoadedBlogs((current) => [...current, ...additionalBlogs])
-    setIsViewMoreLoading(false)
+    loadPosts()
+  }, [page, category, keyword])
+
+  function handleViewMore() {
+    setPage((prev) => prev + 1)
   }
 
-  // เปลี่ยนหมวดจากปุ่มหรือ dropdown
-  function handleCategoryChange(category) {
-    if (category === selectedCategory) return
+  function handleCategoryChange(newCategory) {
+    if (newCategory === category) return
 
-    setIsLoading(true)
-    setSelectedCategory(category)
-    setTimeout(() => setIsLoading(false), LOADING_DELAY.filter)
+    setCategory(newCategory)
+    setPage(1)
+    setPosts([])
   }
 
-  // กด tag บนการ์ด = เปลี่ยนไปกรองหมวดนั้น และล้างคำค้นหา
   function handleTagClick(tag) {
     setSearchQuery('')
-    setDebouncedSearch('')
+    setKeyword('')
     handleCategoryChange(tag)
   }
+
+  function handleSearchChange(value) {
+    setSearchQuery(value)
+    setPage(1)
+    setPosts([])
+  }
+
+  const isViewMoreLoading = isLoading && page > 1
 
   return (
     <section className="bg-background">
@@ -104,7 +101,7 @@ export function ArticleSection() {
                 type="search"
                 placeholder="Search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
                 className={searchInputClassName}
               />
               <img
@@ -124,14 +121,14 @@ export function ArticleSection() {
               <div className="relative">
                 <select
                   id="category-select"
-                  value={selectedCategory}
+                  value={category}
                   onChange={(event) => handleCategoryChange(event.target.value)}
-                  disabled={isLoading}
+                  disabled={isLoading && page === 1}
                   className="w-full appearance-none rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-10 pl-4 text-sm font-medium text-[#43403B] outline-none focus:border-[#75716B] disabled:opacity-60"
                 >
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                  {categories.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
                     </option>
                   ))}
                 </select>
@@ -146,22 +143,22 @@ export function ArticleSection() {
           {/* เวอร์ชัน desktop: ปุ่มหมวดอยู่ซ้าย ช่องค้นหาอยู่ขวา */}
           <div className="hidden md:flex md:items-center md:justify-between md:gap-6">
             <div className="flex flex-wrap items-center gap-1">
-              {categories.map((category) => {
-                const isSelected = selectedCategory === category
+              {categories.map((item) => {
+                const isSelected = category === item
 
                 return (
                   <button
-                    key={category}
+                    key={item}
                     type="button"
-                    onClick={() => handleCategoryChange(category)}
-                    disabled={isLoading}
+                    onClick={() => handleCategoryChange(item)}
+                    disabled={isLoading && page === 1}
                     className={`rounded-full px-5 py-2.5 text-base font-medium transition-colors disabled:opacity-60 ${
                       isSelected
                         ? 'bg-[#DAD6D1] text-[#43403B]'
                         : 'text-[#75716B] hover:text-[#43403B]'
                     }`}
                   >
-                    {category}
+                    {item}
                   </button>
                 )
               })}
@@ -172,7 +169,7 @@ export function ArticleSection() {
                 type="search"
                 placeholder="Search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
                 className={searchInputClassName}
               />
               <img
@@ -184,12 +181,11 @@ export function ArticleSection() {
           </div>
         </div>
 
-        {/* ตอนโหลดแสดง Loading แทน grid บทความ */}
-        {isLoading ? (
+        {isLoading && page === 1 ? (
           <Loading className="py-24" />
         ) : (
           <BlogCat
-            blogs={filteredBlogs}
+            posts={posts}
             hasMore={hasMore}
             isViewMoreLoading={isViewMoreLoading}
             onViewMore={handleViewMore}
