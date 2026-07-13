@@ -1,8 +1,9 @@
 // แสดงรายการบทความแบบ grid 2 คอลัมน์ + ปุ่ม View more
 import { BlogCard } from '@/components/BlogCard'
+import { formatPostDate } from '@/services/postsApi'
 
 export function BlogCat({
-  blogs,
+  posts,
   onViewMore,
   hasMore,
   isViewMoreLoading,
@@ -10,19 +11,18 @@ export function BlogCat({
 }) {
   return (
     <div className="mt-10">
-      {blogs.length > 0 ? (
-        // วนลูป blogs แล้วสร้าง BlogCard ทีละใบ
+      {posts.length > 0 ? (
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-x-8 md:gap-y-12">
-          {blogs.map((blog) => (
+          {posts.map((post) => (
             <BlogCard
-              key={blog.id}
-              id={blog.id}
-              image={blog.image}
-              tag={blog.tag}
-              title={blog.title}
-              excerpt={blog.excerpt}
-              author={blog.author}
-              date={blog.date}
+              key={post.id}
+              id={post.id}
+              image={post.image}
+              tag={post.category}
+              title={post.title}
+              excerpt={post.description}
+              author={post.author}
+              date={formatPostDate(post.date)}
               onTagClick={onTagClick}
             />
           ))}
