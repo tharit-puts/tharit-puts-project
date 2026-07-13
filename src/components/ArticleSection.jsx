@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import searchIcon from '@/assets/Search_light.png'
+import { ArticleSearch } from '@/components/ArticleSearch'
 import { BlogCat } from '@/components/BlogCat'
 import { Loading } from '@/components/Loading'
-import { fetchPosts } from '@/services/postsApi'
+import { fetchPosts, POSTS_PER_PAGE } from '@/services/postsApi'
 
 // รายชื่อหมวดหมู่ที่ให้ผู้ใช้เลือกกรอง
 const categories = ['Highlight', 'Cat', 'Inspiration', 'General']
-
-// class สำหรับช่องค้นหา ใช้ร่วมกันทั้งมือถือและ desktop
-const searchInputClassName =
-  'w-full rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-11 pl-4 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B] md:py-3 md:text-base'
 
 const SEARCH_DEBOUNCE_MS = 500
 
@@ -83,7 +79,15 @@ export function ArticleSection() {
     setPosts([])
   }
 
+  function handleSearchClear() {
+    setSearchQuery('')
+    setKeyword('')
+    setPage(1)
+    setPosts([])
+  }
+
   const isViewMoreLoading = isLoading && page > 1
+  const searchResults = keyword.trim() ? posts.slice(0, POSTS_PER_PAGE) : []
 
   return (
     <section className="bg-background">
@@ -96,20 +100,14 @@ export function ArticleSection() {
         <div className="mt-6 rounded-2xl bg-[#EFEEEB] p-4 md:p-3">
           {/* เวอร์ชันมือถือ: ช่องค้นหาอยู่บน dropdown หมวด */}
           <div className="flex flex-col gap-4 md:hidden">
-            <div className="relative">
-              <input
-                type="search"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(event) => handleSearchChange(event.target.value)}
-                className={searchInputClassName}
-              />
-              <img
-                src={searchIcon}
-                alt=""
-                className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2"
-              />
-            </div>
+            <ArticleSearch
+              searchQuery={searchQuery}
+              onSearchChange={handleSearchChange}
+              onSearchClear={handleSearchClear}
+              results={searchResults}
+              isLoading={isLoading && page === 1}
+              hasKeyword={Boolean(keyword.trim())}
+            />
 
             <div className="flex flex-col gap-2">
               <label
@@ -164,18 +162,14 @@ export function ArticleSection() {
               })}
             </div>
 
-            <div className="relative w-full max-w-xs shrink-0">
-              <input
-                type="search"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(event) => handleSearchChange(event.target.value)}
-                className={searchInputClassName}
-              />
-              <img
-                src={searchIcon}
-                alt=""
-                className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2"
+            <div className="w-full max-w-xs shrink-0">
+              <ArticleSearch
+                searchQuery={searchQuery}
+                onSearchChange={handleSearchChange}
+                onSearchClear={handleSearchClear}
+                results={searchResults}
+                isLoading={isLoading && page === 1}
+                hasKeyword={Boolean(keyword.trim())}
               />
             </div>
           </div>

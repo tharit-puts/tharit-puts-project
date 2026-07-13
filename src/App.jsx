@@ -8,11 +8,13 @@ import { BlogDetailPage } from '@/pages/BlogDetailPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { SignUpPage } from '@/pages/SignUpPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { Toaster } from '@/components/ui/sonner'
 
 function App() {
   return (
     // BrowserRouter = เปิดระบบเปลี่ยนหน้าแบบไม่ reload ทั้งเว็บ
     <BrowserRouter>
+      <Toaster />
       {/* เลื่อนหน้าขึ้นบนสุดทุกครั้งที่เปลี่ยน route */}
       <ScrollToTop />
 
