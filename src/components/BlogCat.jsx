@@ -1,9 +1,17 @@
+// แสดงรายการบทความแบบ grid 2 คอลัมน์ + ปุ่ม View more
 import { BlogCard } from '@/components/BlogCard'
 
-export function BlogCat({ blogs, onViewMore, hasMore, onTagClick }) {
+export function BlogCat({
+  blogs,
+  onViewMore,
+  hasMore,
+  isViewMoreLoading,
+  onTagClick,
+}) {
   return (
     <div className="mt-10">
       {blogs.length > 0 ? (
+        // วนลูป blogs แล้วสร้าง BlogCard ทีละใบ
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-x-8 md:gap-y-12">
           {blogs.map((blog) => (
             <BlogCard
@@ -20,19 +28,22 @@ export function BlogCat({ blogs, onViewMore, hasMore, onTagClick }) {
           ))}
         </div>
       ) : (
+        // ถ้ากรองแล้วไม่เจอบทความ
         <p className="py-12 text-center text-[#75716B]">
           No articles found. Try a different search or category.
         </p>
       )}
 
+      {/* แสดงปุ่ม View more เฉพาะตอนที่ยังมีบทความเหลือให้โหลด */}
       {hasMore && (
         <div className="mt-12 text-center">
           <button
             type="button"
             onClick={onViewMore}
-            className="text-base font-medium text-foreground underline underline-offset-4 transition-colors hover:text-[#75716B]"
+            disabled={isViewMoreLoading}
+            className="text-base font-medium text-foreground underline underline-offset-4 transition-colors hover:text-[#75716B] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            View more
+            {isViewMoreLoading ? 'Loading...' : 'View more'}
           </button>
         </div>
       )}

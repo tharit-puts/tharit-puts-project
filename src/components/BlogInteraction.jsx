@@ -1,9 +1,11 @@
+// แถบปุ่มโต้ตอบใต้บทความ — emotion, copy link, แชร์โซเชียล
 import { useState } from 'react'
 import { Copy, Smile } from 'lucide-react'
 import twitterIcon from '@/assets/colorTwitter.png'
 import linkedinIcon from '@/assets/colorLinkedin.png'
 import facebookIcon from '@/assets/colorFacebook.png'
 
+// ลิงก์ไอคอนโซเชียลสำหรับแชร์บทความ
 const socialLinks = [
   { href: 'https://twitter.com', icon: twitterIcon, label: 'Share on Twitter' },
   { href: 'https://linkedin.com', icon: linkedinIcon, label: 'Share on LinkedIn' },
@@ -11,8 +13,13 @@ const socialLinks = [
 ]
 
 export function BlogInteraction({ initialCount }) {
+  // ยอดกด emotion เริ่มจากค่าที่ส่งเข้ามา
   const [emotionCount, setEmotionCount] = useState(initialCount)
+
+  // กันกด emotion ซ้ำได้แค่ครั้งเดียวต่อการเข้าหน้า
   const [hasReacted, setHasReacted] = useState(false)
+
+  // สถานะว่าคัดลอกลิงก์สำเร็จหรือยัง
   const [copied, setCopied] = useState(false)
 
   function handleEmotionClick() {
@@ -22,6 +29,7 @@ export function BlogInteraction({ initialCount }) {
     }
   }
 
+  // คัดลอก URL ปัจจุบันไปยัง clipboard
   async function handleCopyLink() {
     await navigator.clipboard.writeText(window.location.href)
     setCopied(true)

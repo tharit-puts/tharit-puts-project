@@ -1,9 +1,11 @@
+// การ์ดบทความ 1 ชิ้น — รับข้อมูลผ่าน props แล้วแสดงรูป tag หัวข้อ บทย่อ และผู้เขียน
 import { Link } from 'react-router-dom'
 import authorAvatar from '@/assets/man-with-cat.jpg'
 
 export function BlogCard({ id, image, tag, title, excerpt, author, date, onTagClick }) {
   return (
     <article className="flex flex-col gap-4">
+      {/* กดรูปแล้วเข้าหน้าอ่านบทความ */}
       <Link to={`/post/${id}`} className="group">
         <img
           src={image}
@@ -12,6 +14,7 @@ export function BlogCard({ id, image, tag, title, excerpt, author, date, onTagCl
         />
       </Link>
 
+      {/* กด tag เพื่อกรองบทความตามหมวด (ส่งค่ากลับไปให้ parent จัดการ) */}
       <button
         type="button"
         onClick={() => onTagClick?.(tag)}
@@ -20,6 +23,7 @@ export function BlogCard({ id, image, tag, title, excerpt, author, date, onTagCl
         {tag}
       </button>
 
+      {/* กดหัวข้อ/บทย่อ/ข้อมูลผู้เขียน ก็เข้าหน้าบทความได้เช่นกัน */}
       <Link to={`/post/${id}`} className="group flex flex-col gap-4">
         <h3 className="text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-[#75716B]">
           {title}

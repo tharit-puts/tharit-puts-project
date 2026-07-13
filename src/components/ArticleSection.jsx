@@ -1,45 +1,91 @@
-import { useMemo, useState } from 'react'
+// ส่วน Latest articles — จัดการ filter, search, view more และส่งข้อมูลให้ BlogCat แสดงผล
+import { useEffect, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import searchIcon from '@/assets/Search_light.png'
 import { BlogCat } from '@/components/BlogCat'
+import { Loading } from '@/components/Loading'
 import { additionalBlogs, initialBlogs } from '@/data/blogs'
+import { LOADING_DELAY, wait } from '@/lib/loading'
 
+// รายชื่อหมวดหมู่ที่ให้ผู้ใช้เลือกกรอง
 const categories = ['Highlight', 'Cat', 'Inspiration', 'General']
 
+// class สำหรับช่องค้นหา ใช้ร่วมกันทั้งมือถือและ desktop
 const searchInputClassName =
   'w-full rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-11 pl-4 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B] md:py-3 md:text-base'
 
 export function ArticleSection() {
+  // หมวดที่เลือกอยู่ตอนนี้ (Highlight = แสดงทุกหมวด)
   const [selectedCategory, setSelectedCategory] = useState('Highlight')
+
+  // คำที่ผู้ใช้พิมพ์ในช่อง search ทันที หรือ สิ่งที่กำลังพิมพ์
   const [searchQuery, setSearchQuery] = useState('')
+
+  // คำค้นหาหลังรอ debounce แล้ว ใช้จริงตอนกรองข้อมูล
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  // บทความที่โหลดมาแล้วทั้งหมด (เริ่มจาก 6 รายการแรก)
   const [loadedBlogs, setLoadedBlogs] = useState(initialBlogs)
 
-  const filteredBlogs = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
+  // กำลังโหลดตอนเปลี่ยนหมวดหรือค้นหา
+  const [isLoading, setIsLoading] = useState(false)
 
-    return loadedBlogs.filter((blog) => {
-      const matchesCategory =
-        selectedCategory === 'Highlight' || blog.category === selectedCategory
+  // กำลังโหลดตอนกด View more
+  const [isViewMoreLoading, setIsViewMoreLoading] = useState(false)
 
-      const matchesSearch =
-        !query ||
-        blog.tag.toLowerCase().includes(query) ||
-        blog.title.toLowerCase().includes(query) ||
-        blog.excerpt.toLowerCase().includes(query)
+  // รอให้ผู้ใช้พิมพ์หยุดก่อน แล้วค่อยอัปเดตคำค้นหาที่ใช้กรองจริง
+  useEffect(() => {
+    setIsLoading(true) // เริ่มกำลังโหลด
 
-      return matchesCategory && matchesSearch
-    })
-  }, [loadedBlogs, selectedCategory, searchQuery])
+    const timer = setTimeout(() => { // รอจนกว่าจะผ่านระยะเวลา LOADING_DELAY.search ก่อนที่จะอัปเดตคำค้นหาหลังรอ debounce แล้ว
+      setDebouncedSearch(searchQuery) // อัปเดตคำค้นหาหลังรอ debounce แล้ว
+      setIsLoading(false) // หยุดกำลังโหลด
+    }, LOADING_DELAY.search)
 
+    return () => clearTimeout(timer) // ล้าง timeout เมื่อ component unmount
+  }, [searchQuery]) // รอกดปุ่ม search หรือ กดปุ่ม enter ในช่อง search ก่อนที่จะอัปเดตคำค้นหาหลังรอ debounce แล้ว
+
+  // กรองบทความตามหมวดและคำค้นหา
+  const filteredBlogs = loadedBlogs.filter((blog) => {
+    const query = debouncedSearch.trim().toLowerCase()
+
+    const matchesCategory = //แสดง blog ที่มี category ตรงกับหมวดที่เลือก
+      selectedCategory === 'Highlight' || blog.category === selectedCategory 
+
+    const matchesSearch = //แสดง blog ที่มี tag, title, excerpt ตรงกับคำค้นหา
+      !query || 
+      blog.tag.toLowerCase().includes(query) || 
+      blog.title.toLowerCase().includes(query) || 
+      blog.excerpt.toLowerCase().includes(query) 
+
+    return matchesCategory && matchesSearch
+  })
+
+  // ยังโหลดบทความเพิ่มได้อีกไหม (เทียบกับจำนวนทั้งหมดที่มีในไฟล์ข้อมูล)
   const hasMore = loadedBlogs.length < initialBlogs.length + additionalBlogs.length
 
-  function handleViewMore() {
+  // กด View more = รอสักครู่แล้วเอาบทความ 10 รายการถัดไปมาต่อท้าย
+  async function handleViewMore() {
+    setIsViewMoreLoading(true)
+    await wait(LOADING_DELAY.viewMore)
     setLoadedBlogs((current) => [...current, ...additionalBlogs])
+    setIsViewMoreLoading(false)
   }
 
+  // เปลี่ยนหมวดจากปุ่มหรือ dropdown
+  function handleCategoryChange(category) {
+    if (category === selectedCategory) return
+
+    setIsLoading(true)
+    setSelectedCategory(category)
+    setTimeout(() => setIsLoading(false), LOADING_DELAY.filter)
+  }
+
+  // กด tag บนการ์ด = เปลี่ยนไปกรองหมวดนั้น และล้างคำค้นหา
   function handleTagClick(tag) {
-    setSelectedCategory(tag)
     setSearchQuery('')
+    setDebouncedSearch('')
+    handleCategoryChange(tag)
   }
 
   return (
@@ -49,7 +95,9 @@ export function ArticleSection() {
           Latest articles
         </h2>
 
+        {/* แถบ filter + search */}
         <div className="mt-6 rounded-2xl bg-[#EFEEEB] p-4 md:p-3">
+          {/* เวอร์ชันมือถือ: ช่องค้นหาอยู่บน dropdown หมวด */}
           <div className="flex flex-col gap-4 md:hidden">
             <div className="relative">
               <input
@@ -77,8 +125,9 @@ export function ArticleSection() {
                 <select
                   id="category-select"
                   value={selectedCategory}
-                  onChange={(event) => setSelectedCategory(event.target.value)}
-                  className="w-full appearance-none rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-10 pl-4 text-sm font-medium text-[#43403B] outline-none focus:border-[#75716B]"
+                  onChange={(event) => handleCategoryChange(event.target.value)}
+                  disabled={isLoading}
+                  className="w-full appearance-none rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-10 pl-4 text-sm font-medium text-[#43403B] outline-none focus:border-[#75716B] disabled:opacity-60"
                 >
                   {categories.map((category) => (
                     <option key={category} value={category}>
@@ -94,6 +143,7 @@ export function ArticleSection() {
             </div>
           </div>
 
+          {/* เวอร์ชัน desktop: ปุ่มหมวดอยู่ซ้าย ช่องค้นหาอยู่ขวา */}
           <div className="hidden md:flex md:items-center md:justify-between md:gap-6">
             <div className="flex flex-wrap items-center gap-1">
               {categories.map((category) => {
@@ -103,8 +153,9 @@ export function ArticleSection() {
                   <button
                     key={category}
                     type="button"
-                    onClick={() => setSelectedCategory(category)}
-                    className={`rounded-full px-5 py-2.5 text-base font-medium transition-colors ${
+                    onClick={() => handleCategoryChange(category)}
+                    disabled={isLoading}
+                    className={`rounded-full px-5 py-2.5 text-base font-medium transition-colors disabled:opacity-60 ${
                       isSelected
                         ? 'bg-[#DAD6D1] text-[#43403B]'
                         : 'text-[#75716B] hover:text-[#43403B]'
@@ -133,12 +184,18 @@ export function ArticleSection() {
           </div>
         </div>
 
-        <BlogCat
-          blogs={filteredBlogs}
-          hasMore={hasMore}
-          onViewMore={handleViewMore}
-          onTagClick={handleTagClick}
-        />
+        {/* ตอนโหลดแสดง Loading แทน grid บทความ */}
+        {isLoading ? (
+          <Loading className="py-24" />
+        ) : (
+          <BlogCat
+            blogs={filteredBlogs}
+            hasMore={hasMore}
+            isViewMoreLoading={isViewMoreLoading}
+            onViewMore={handleViewMore}
+            onTagClick={handleTagClick}
+          />
+        )}
       </div>
     </section>
   )
