@@ -7,6 +7,7 @@ import { HomePage } from '@/pages/HomePage'
 import { BlogDetailPage } from '@/pages/BlogDetailPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { SignUpPage } from '@/pages/SignUpPage'
+import { NotFoundPage } from '@/pages/NotFoundPage'
 
 function App() {
   return (
@@ -36,6 +37,9 @@ function App() {
 
         {/* หน้าสมัครสมาชิก */}
         <Route path="/signup" element={<SignUpPage />} />
+
+        {/* หน้า 404 — จับ URL ที่ไม่มีใน Router */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )
