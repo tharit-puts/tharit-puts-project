@@ -71,16 +71,6 @@ export function ArticleSection() {
     setPosts([])
   }
 
-  // เปลี่ยนหมวดจากปุ่มหรือ dropdown
-  function handleCategoryChange(category) {
-    if (category === selectedCategory) return
-
-    setIsLoading(true)
-    setSelectedCategory(category)
-    setTimeout(() => setIsLoading(false), LOADING_DELAY.filter)
-  }
-
-  // กด tag บนการ์ด = เปลี่ยนไปกรองหมวดนั้น และล้างคำค้นหา
   function handleTagClick(tag) {
     setSearchQuery('')
     setKeyword('')
