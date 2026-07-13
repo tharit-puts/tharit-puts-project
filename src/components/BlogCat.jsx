@@ -1,20 +1,27 @@
 import { BlogCard } from '@/components/BlogCard'
+import { formatPostDate } from '@/services/postsApi'
 
-export function BlogCat({ blogs, onViewMore, hasMore, onTagClick }) {
+export function BlogCat({
+  posts,
+  onViewMore,
+  hasMore,
+  isViewMoreLoading,
+  onTagClick,
+}) {
   return (
     <div className="mt-10">
-      {blogs.length > 0 ? (
+      {posts.length > 0 ? (
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-x-8 md:gap-y-12">
-          {blogs.map((blog) => (
+          {posts.map((post) => (
             <BlogCard
-              key={blog.id}
-              id={blog.id}
-              image={blog.image}
-              tag={blog.tag}
-              title={blog.title}
-              excerpt={blog.excerpt}
-              author={blog.author}
-              date={blog.date}
+              key={post.id}
+              id={post.id}
+              image={post.image}
+              tag={post.category}
+              title={post.title}
+              excerpt={post.description}
+              author={post.author}
+              date={formatPostDate(post.date)}
               onTagClick={onTagClick}
             />
           ))}
@@ -30,9 +37,10 @@ export function BlogCat({ blogs, onViewMore, hasMore, onTagClick }) {
           <button
             type="button"
             onClick={onViewMore}
-            className="text-base font-medium text-foreground underline underline-offset-4 transition-colors hover:text-[#75716B]"
+            disabled={isViewMoreLoading}
+            className="text-base font-medium text-foreground underline underline-offset-4 transition-colors hover:text-[#75716B] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            View more
+            {isViewMoreLoading ? 'Loading...' : 'View more'}
           </button>
         </div>
       )}

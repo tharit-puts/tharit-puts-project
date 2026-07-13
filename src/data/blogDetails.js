@@ -49,7 +49,7 @@ function seededRandom(seed) {
   }
 }
 
-function pickComments(blogId) {
+export function pickComments(blogId) {
   const random = seededRandom(blogId * 7919)
   const shuffled = [...commentPool].sort(() => random() - 0.5)
   return shuffled.slice(0, 3)

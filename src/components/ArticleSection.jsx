@@ -1,46 +1,87 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import searchIcon from '@/assets/Search_light.png'
 import { BlogCat } from '@/components/BlogCat'
-import { additionalBlogs, initialBlogs } from '@/data/blogs'
+import { Loading } from '@/components/Loading'
+import { fetchPosts } from '@/services/postsApi'
 
 const categories = ['Highlight', 'Cat', 'Inspiration', 'General']
 
 const searchInputClassName =
   'w-full rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-11 pl-4 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B] md:py-3 md:text-base'
 
+const SEARCH_DEBOUNCE_MS = 500
+
 export function ArticleSection() {
-  const [selectedCategory, setSelectedCategory] = useState('Highlight')
+  const [posts, setPosts] = useState([])
+  const [page, setPage] = useState(1)
+  const [category, setCategory] = useState('Highlight')
   const [searchQuery, setSearchQuery] = useState('')
-  const [loadedBlogs, setLoadedBlogs] = useState(initialBlogs)
+  const [keyword, setKeyword] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [hasMore, setHasMore] = useState(true)
 
-  const filteredBlogs = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setKeyword(searchQuery)
+    }, SEARCH_DEBOUNCE_MS)
 
-    return loadedBlogs.filter((blog) => {
-      const matchesCategory =
-        selectedCategory === 'Highlight' || blog.category === selectedCategory
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
-      const matchesSearch =
-        !query ||
-        blog.tag.toLowerCase().includes(query) ||
-        blog.title.toLowerCase().includes(query) ||
-        blog.excerpt.toLowerCase().includes(query)
+  useEffect(() => {
+    async function loadPosts() {
+      setIsLoading(true)
 
-      return matchesCategory && matchesSearch
-    })
-  }, [loadedBlogs, selectedCategory, searchQuery])
+      try {
+        const data = await fetchPosts({ page, category, keyword })
 
-  const hasMore = loadedBlogs.length < initialBlogs.length + additionalBlogs.length
+        setPosts((prev) =>
+          page === 1 ? data.posts : [...prev, ...data.posts],
+        )
+
+        setHasMore(data.currentPage < data.totalPages)
+      } catch (error) {
+        console.error('Failed to fetch posts:', error)
+
+        if (page === 1) {
+          setPosts([])
+        }
+
+        setHasMore(false)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadPosts()
+  }, [page, category, keyword])
 
   function handleViewMore() {
-    setLoadedBlogs((current) => [...current, ...additionalBlogs])
+    setPage((prev) => prev + 1)
+  }
+
+  function handleCategoryChange(newCategory) {
+    if (newCategory === category) return
+
+    setCategory(newCategory)
+    setPage(1)
+    setPosts([])
   }
 
   function handleTagClick(tag) {
-    setSelectedCategory(tag)
     setSearchQuery('')
+    setKeyword('')
+    handleCategoryChange(tag)
   }
+
+  function handleSearchChange(value) {
+    setSearchQuery(value)
+    setPage(1)
+    setPosts([])
+  }
+
+  const isViewMoreLoading = isLoading && page > 1
 
   return (
     <section className="bg-background">
@@ -56,7 +97,7 @@ export function ArticleSection() {
                 type="search"
                 placeholder="Search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
                 className={searchInputClassName}
               />
               <img
@@ -76,13 +117,14 @@ export function ArticleSection() {
               <div className="relative">
                 <select
                   id="category-select"
-                  value={selectedCategory}
-                  onChange={(event) => setSelectedCategory(event.target.value)}
-                  className="w-full appearance-none rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-10 pl-4 text-sm font-medium text-[#43403B] outline-none focus:border-[#75716B]"
+                  value={category}
+                  onChange={(event) => handleCategoryChange(event.target.value)}
+                  disabled={isLoading && page === 1}
+                  className="w-full appearance-none rounded-full border border-[#DAD6D1] bg-[#FFFFFF] py-2.5 pr-10 pl-4 text-sm font-medium text-[#43403B] outline-none focus:border-[#75716B] disabled:opacity-60"
                 >
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                  {categories.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
                     </option>
                   ))}
                 </select>
@@ -96,21 +138,22 @@ export function ArticleSection() {
 
           <div className="hidden md:flex md:items-center md:justify-between md:gap-6">
             <div className="flex flex-wrap items-center gap-1">
-              {categories.map((category) => {
-                const isSelected = selectedCategory === category
+              {categories.map((item) => {
+                const isSelected = category === item
 
                 return (
                   <button
-                    key={category}
+                    key={item}
                     type="button"
-                    onClick={() => setSelectedCategory(category)}
-                    className={`rounded-full px-5 py-2.5 text-base font-medium transition-colors ${
+                    onClick={() => handleCategoryChange(item)}
+                    disabled={isLoading && page === 1}
+                    className={`rounded-full px-5 py-2.5 text-base font-medium transition-colors disabled:opacity-60 ${
                       isSelected
                         ? 'bg-[#DAD6D1] text-[#43403B]'
                         : 'text-[#75716B] hover:text-[#43403B]'
                     }`}
                   >
-                    {category}
+                    {item}
                   </button>
                 )
               })}
@@ -121,7 +164,7 @@ export function ArticleSection() {
                 type="search"
                 placeholder="Search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
                 className={searchInputClassName}
               />
               <img
@@ -133,12 +176,17 @@ export function ArticleSection() {
           </div>
         </div>
 
-        <BlogCat
-          blogs={filteredBlogs}
-          hasMore={hasMore}
-          onViewMore={handleViewMore}
-          onTagClick={handleTagClick}
-        />
+        {isLoading && page === 1 ? (
+          <Loading className="py-24" />
+        ) : (
+          <BlogCat
+            posts={posts}
+            hasMore={hasMore}
+            isViewMoreLoading={isViewMoreLoading}
+            onViewMore={handleViewMore}
+            onTagClick={handleTagClick}
+          />
+        )}
       </div>
     </section>
   )
