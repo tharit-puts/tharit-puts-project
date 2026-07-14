@@ -4,7 +4,42 @@ import { API_BASE_URL } from '@/services/postsApi'
 export const EMAIL_TAKEN_MESSAGE =
   'Email is already taken, Please try another email.'
 
+export const INVALID_CREDENTIALS_MESSAGE =
+  'Incorrect email or password. Please try again.'
+
 const STORAGE_KEY = 'hh_registered_users'
+const SESSION_KEY = 'hh_current_user'
+const NOTIFICATIONS_KEY = 'hh_has_notifications'
+
+function sanitizeUser(user) {
+  if (!user) return null
+
+  const { password, ...safeUser } = user
+  return safeUser
+}
+
+export function getCurrentUser() {
+  try {
+    const data = localStorage.getItem(SESSION_KEY)
+    return data ? JSON.parse(data) : null
+  } catch {
+    return null
+  }
+}
+
+export function getHasNotifications() {
+  return localStorage.getItem(NOTIFICATIONS_KEY) === 'true'
+}
+
+export function saveSession(user) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(sanitizeUser(user)))
+  localStorage.setItem(NOTIFICATIONS_KEY, 'true')
+}
+
+export function clearSession() {
+  localStorage.removeItem(SESSION_KEY)
+  localStorage.removeItem(NOTIFICATIONS_KEY)
+}
 
 function getStoredUsers() {
   try {
@@ -26,6 +61,8 @@ function registerLocally({ name, username, email, password }) {
 
   users.push({ name, username, email: normalizedEmail, password })
   localStorage.setItem(STORAGE_KEY, JSON.stringify(users))
+
+  return sanitizeUser({ name, username, email: normalizedEmail })
 }
 
 function isEmailTakenError(error) {
@@ -46,22 +83,63 @@ function isEmailTakenError(error) {
 
 export async function registerUser({ name, username, email, password }) {
   try {
-    await axios.post(`${API_BASE_URL}/auth/register`, {
+    const response = await axios.post(`${API_BASE_URL}/auth/register`, {
       name,
       username,
       email,
       password,
     })
+    return sanitizeUser(response.data?.user ?? { name, username, email })
   } catch (error) {
     if (error.response?.status === 404) {
-      registerLocally({ name, username, email, password })
-      return
+      return registerLocally({ name, username, email, password })
     }
 
     if (isEmailTakenError(error)) {
       const takenError = new Error(EMAIL_TAKEN_MESSAGE)
       takenError.code = 'EMAIL_TAKEN'
       throw takenError
+    }
+
+    throw error
+  }
+}
+
+function loginLocally({ email, password }) {
+  const normalizedEmail = email.trim().toLowerCase()
+  const user = getStoredUsers().find((entry) => entry.email === normalizedEmail)
+
+  if (!user || user.password !== password) {
+    const error = new Error(INVALID_CREDENTIALS_MESSAGE)
+    error.code = 'INVALID_CREDENTIALS'
+    throw error
+  }
+
+  return sanitizeUser(user)
+}
+
+function isInvalidCredentialsError(error) {
+  const status = error.response?.status
+
+  return status === 401 || status === 400
+}
+
+export async function loginUser({ email, password }) {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+      email,
+      password,
+    })
+    return sanitizeUser(response.data?.user ?? response.data)
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return loginLocally({ email, password })
+    }
+
+    if (isInvalidCredentialsError(error)) {
+      const credentialsError = new Error(INVALID_CREDENTIALS_MESSAGE)
+      credentialsError.code = 'INVALID_CREDENTIALS'
+      throw credentialsError
     }
 
     throw error

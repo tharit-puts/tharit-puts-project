@@ -10,12 +10,14 @@ import { SignUpPage } from '@/pages/SignUpPage'
 import { RegistrationSuccessPage } from '@/pages/RegistrationSuccessPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { Toaster } from '@/components/ui/sonner'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 function App() {
   return (
     // BrowserRouter = เปิดระบบเปลี่ยนหน้าแบบไม่ reload ทั้งเว็บ
     <BrowserRouter>
-      <Toaster />
+      <AuthProvider>
+        <Toaster />
       {/* เลื่อนหน้าขึ้นบนสุดทุกครั้งที่เปลี่ยน route */}
       <ScrollToTop />
 
@@ -47,6 +49,7 @@ function App() {
         {/* หน้า 404 — จับ URL ที่ไม่มีใน Router */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

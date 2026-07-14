@@ -18,7 +18,10 @@ export function AuthInput({
   onChange,
   onBlur,
   error,
+  invalid,
 }) {
+  const hasErrorStyle = Boolean(error || invalid)
+
   return (
     <div>
       <label htmlFor={id} className="text-sm font-medium text-foreground">
@@ -32,8 +35,8 @@ export function AuthInput({
         {...(value !== undefined ? { value } : {})}
         {...(onChange ? { onChange } : {})}
         {...(onBlur ? { onBlur } : {})}
-        aria-invalid={Boolean(error)}
-        className={`mt-2 ${inputClassName} ${error ? inputErrorClassName : ''}`}
+        aria-invalid={hasErrorStyle}
+        className={`mt-2 ${inputClassName} ${hasErrorStyle ? inputErrorClassName : ''}`}
       />
       {error ? <p className="mt-1 text-sm text-red-500">{error}</p> : null}
     </div>

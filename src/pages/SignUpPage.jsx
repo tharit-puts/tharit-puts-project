@@ -6,6 +6,7 @@ import { AuthFormCard, AuthInput } from '@/components/AuthForm'
 import { Loading } from '@/components/Loading'
 import { Button } from '@/components/ui/button'
 import { usePageLoading } from '@/hooks/usePageLoading'
+import { useAuth } from '@/contexts/AuthContext'
 import { EMAIL_TAKEN_MESSAGE, registerUser } from '@/services/authApi'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -29,6 +30,7 @@ function validatePassword(value) {
 export function SignUpPage() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { login } = useAuth()
   const isLoading = usePageLoading([location.pathname])
 
   const [email, setEmail] = useState('')
@@ -91,7 +93,8 @@ export function SignUpPage() {
     setIsSubmitting(true)
 
     try {
-      await registerUser({ name, username, email, password })
+      const user = await registerUser({ name, username, email, password })
+      login(user)
       navigate('/registration-success')
     } catch (error) {
       if (error.code === 'EMAIL_TAKEN' || error.message === EMAIL_TAKEN_MESSAGE) {
@@ -117,7 +120,7 @@ export function SignUpPage() {
         <main className="mx-auto flex max-w-6xl justify-center px-6 py-16 md:px-10 md:py-24">
           <AuthFormCard title="Sign up">
             <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-              <AuthInput id="name" label="Name" placeholder="Full name" />
+              <AuthInput id="name" label="Name" placeholder="Display name" />
               <AuthInput id="username" label="Username" placeholder="Username" />
               <AuthInput
                 id="email"
