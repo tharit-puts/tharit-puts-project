@@ -4,8 +4,21 @@
 const inputClassName =
   'w-full rounded-xl border border-[#DAD6D1] bg-white px-4 py-3 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B]'
 
+const inputErrorClassName =
+  'border-red-500 text-red-500 placeholder:text-red-500 focus:border-red-500'
+
 // ช่องกรอกข้อมูล 1 ช่อง (มี label + input)
-export function AuthInput({ id, label, type = 'text', placeholder }) {
+export function AuthInput({
+  id,
+  name,
+  label,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  onBlur,
+  error,
+}) {
   return (
     <div>
       <label htmlFor={id} className="text-sm font-medium text-foreground">
@@ -13,10 +26,16 @@ export function AuthInput({ id, label, type = 'text', placeholder }) {
       </label>
       <input
         id={id}
+        name={name ?? id}
         type={type}
         placeholder={placeholder}
-        className={`mt-2 ${inputClassName}`}
+        {...(value !== undefined ? { value } : {})}
+        {...(onChange ? { onChange } : {})}
+        {...(onBlur ? { onBlur } : {})}
+        aria-invalid={Boolean(error)}
+        className={`mt-2 ${inputClassName} ${error ? inputErrorClassName : ''}`}
       />
+      {error ? <p className="mt-1 text-sm text-red-500">{error}</p> : null}
     </div>
   )
 }

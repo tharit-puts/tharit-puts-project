@@ -7,6 +7,7 @@ import { HomePage } from '@/pages/HomePage'
 import { BlogDetailPage } from '@/pages/BlogDetailPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { SignUpPage } from '@/pages/SignUpPage'
+import { RegistrationSuccessPage } from '@/pages/RegistrationSuccessPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -39,6 +40,9 @@ function App() {
 
         {/* หน้าสมัครสมาชิก */}
         <Route path="/signup" element={<SignUpPage />} />
+
+        {/* หน้าสมัครสำเร็จ */}
+        <Route path="/registration-success" element={<RegistrationSuccessPage />} />
 
         {/* หน้า 404 — จับ URL ที่ไม่มีใน Router */}
         <Route path="*" element={<NotFoundPage />} />
