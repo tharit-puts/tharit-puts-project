@@ -1,7 +1,10 @@
+// ส่วนท้ายเว็บ — ลิงก์โซเชียลและปุ่มกลับหน้าแรก
+import { Link } from 'react-router-dom'
 import linkedInIcon from '@/assets/LinkedIN_black.png'
 import githubIcon from '@/assets/Github_black.png'
 import googleIcon from '@/assets/Google_black.png'
 
+// รายการไอคอนโซเชียลที่จะแสดงใน footer
 const socialLinks = [
   { href: '#', icon: linkedInIcon, label: 'LinkedIn' },
   { href: '#', icon: githubIcon, label: 'GitHub' },
@@ -11,7 +14,8 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className="bg-[#EFEEEB]">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-10 md:px-10">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-2 py-10 md:px-10">
+        {/* ฝั่งซ้าย: ข้อความ Get in touch + ไอคอนโซเชียล */}
         <div className="flex items-center gap-4">
           <span className="text-sm font-medium text-foreground md:text-base">
             Get in touch
@@ -30,12 +34,13 @@ export function Footer() {
           </div>
         </div>
 
-        <a
-          href="/"
-          className="text-sm font-medium text-foreground underline underline-offset-4 md:text-base"
+        {/* ฝั่งขวา: ลิงก์กลับหน้าแรก */}
+        <Link
+          to="/"
+          className="text-sm font-medium text-foreground underline underline-offset-4 md:text-base "
         >
-          Home page
-        </a>
+          Home page 
+        </Link> 
       </div>
     </footer>
   )
