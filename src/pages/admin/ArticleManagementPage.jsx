@@ -2,10 +2,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Loading } from '@/components/Loading'
-import { fetchAllPosts } from '@/services/postsApi'
-import { getPostStatus, getStatusLabel } from '@/services/adminPosts'
+import { DeleteArticleModal } from '@/components/admin/DeleteArticleModal'
+import { deletePost, fetchAllPosts } from '@/services/postsApi'
+import { getPostStatus, getStatusLabel, removePostStatus } from '@/services/adminPosts'
 import searchIcon from '@/assets/Search_light.png'
 
 const statusOptions = [
@@ -40,6 +42,8 @@ export function ArticleManagementPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     async function loadPosts() {
@@ -58,6 +62,27 @@ export function ArticleManagementPage() {
 
     loadPosts()
   }, [])
+
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) return
+
+    setIsDeleting(true)
+
+    try {
+      await deletePost(deleteTarget.id)
+      removePostStatus(deleteTarget.id)
+      setPosts((current) => current.filter((post) => post.id !== deleteTarget.id))
+      toast.success('Article deleted')
+      setDeleteTarget(null)
+    } catch (error) {
+      console.error('Failed to delete article:', error)
+      toast.error('Failed to delete article', {
+        description: 'Please try again later.',
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const categories = useMemo(() => {
     const unique = [...new Set(posts.map((post) => post.category).filter(Boolean))]
@@ -79,7 +104,8 @@ export function ArticleManagementPage() {
   }, [posts, searchQuery, statusFilter, categoryFilter])
 
   return (
-    <div className="px-8 py-10">
+    <>
+      <div className="px-8 py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-foreground">Article management</h1>
         <Button
@@ -167,6 +193,7 @@ export function ArticleManagementPage() {
                 <button
                   type="button"
                   aria-label={`Edit ${post.title}`}
+                  onClick={() => navigate(`/admin/articles/${post.id}/edit`)}
                   className="text-[#75716B] transition-colors hover:text-foreground"
                 >
                   <Pencil className="h-4 w-4" />
@@ -174,6 +201,7 @@ export function ArticleManagementPage() {
                 <button
                   type="button"
                   aria-label={`Delete ${post.title}`}
+                  onClick={() => setDeleteTarget(post)}
                   className="text-[#75716B] transition-colors hover:text-foreground"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -187,6 +215,14 @@ export function ArticleManagementPage() {
           </p>
         )}
       </div>
-    </div>
+      </div>
+
+      <DeleteArticleModal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        isSubmitting={isDeleting}
+      />
+    </>
   )
 }

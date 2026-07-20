@@ -23,3 +23,13 @@ export function setPostStatus(postId, status) {
     console.error('Failed to save post status:', error)
   }
 }
+
+export function removePostStatus(postId) {
+  try {
+    const map = JSON.parse(localStorage.getItem(STATUS_STORAGE_KEY) ?? '{}')
+    delete map[postId]
+    localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(map))
+  } catch (error) {
+    console.error('Failed to remove post status:', error)
+  }
+}

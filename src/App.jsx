@@ -14,6 +14,7 @@ import { AdminLoginPage } from '@/pages/AdminLoginPage'
 import { AdminLayout } from '@/components/admin/AdminLayout'
 import { ArticleManagementPage } from '@/pages/admin/ArticleManagementPage'
 import { CreateArticlePage } from '@/pages/admin/CreateArticlePage'
+import { EditArticlePage } from '@/pages/admin/EditArticlePage'
 import { AdminPlaceholderPage } from '@/pages/admin/AdminPlaceholderPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { Toaster } from '@/components/ui/sonner'
@@ -65,6 +66,7 @@ function App() {
           <Route index element={<Navigate to="articles" replace />} />
           <Route path="articles" element={<ArticleManagementPage />} />
           <Route path="articles/new" element={<CreateArticlePage />} />
+          <Route path="articles/:id/edit" element={<EditArticlePage />} />
           <Route
             path="categories"
             element={<AdminPlaceholderPage title="Category management" />}

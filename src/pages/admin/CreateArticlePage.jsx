@@ -1,18 +1,13 @@
 // หน้า Create article — ฟอร์มสร้างบทความใหม่ใน admin panel
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { ArticleFormFields, INTRO_MAX_LENGTH } from '@/components/admin/ArticleFormFields'
 import { createPost } from '@/services/postsApi'
 import { setPostStatus } from '@/services/adminPosts'
 
-const inputClassName =
-  'w-full rounded-xl border border-[#DAD6D1] bg-white px-4 py-3 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B]'
-
-const categoryOptions = ['Cat', 'Inspiration', 'General']
 const DEFAULT_AUTHOR = 'Thompson P.'
-const INTRO_MAX_LENGTH = 120
 
 export function CreateArticlePage() {
   const navigate = useNavigate()
@@ -121,120 +116,23 @@ export function CreateArticlePage() {
 
       <div className="mt-8 rounded-2xl bg-[#EFEEEB] px-6 py-8 md:px-10 md:py-10">
         <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
-          <div>
-            <p className="text-sm font-medium text-foreground">Thumbnail image</p>
-            <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end">
-              <div className="flex h-40 w-full max-w-md items-center justify-center overflow-hidden rounded-2xl border border-dashed border-[#DAD6D1] bg-[#F9F8F6]">
-                {thumbnail ? (
-                  <img
-                    src={thumbnail}
-                    alt="Article thumbnail preview"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <ImageIcon className="h-10 w-10 text-[#DAD6D1]" strokeWidth={1.5} />
-                )}
-              </div>
-              <div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleUploadClick}
-                  className="rounded-full border-[#75716B] px-6 py-5 text-sm font-medium"
-                >
-                  Upload thumbnail image
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="category" className="text-sm font-medium text-foreground">
-              Category
-            </label>
-            <div className="relative mt-2">
-              <select
-                id="category"
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                className={`${inputClassName} appearance-none pr-10 text-[#43403B]`}
-              >
-                <option value="">Select category</option>
-                {categoryOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-[#75716B]" />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="author" className="text-sm font-medium text-foreground">
-              Author name
-            </label>
-            <input
-              id="author"
-              type="text"
-              value={DEFAULT_AUTHOR}
-              readOnly
-              className={`mt-2 ${inputClassName} bg-[#F9F8F6] text-[#75716B]`}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="title" className="text-sm font-medium text-foreground">
-              Title
-            </label>
-            <input
-              id="title"
-              type="text"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="Article title"
-              className={`mt-2 ${inputClassName}`}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="introduction" className="text-sm font-medium text-foreground">
-              Introduction (max 120 letters)
-            </label>
-            <textarea
-              id="introduction"
-              value={introduction}
-              onChange={(event) => setIntroduction(event.target.value.slice(0, INTRO_MAX_LENGTH))}
-              placeholder="Introduction"
-              rows={4}
-              maxLength={INTRO_MAX_LENGTH}
-              className={`mt-2 ${inputClassName} resize-y`}
-            />
-            <p className="mt-1 text-right text-xs text-[#75716B]">
-              {introduction.length}/{INTRO_MAX_LENGTH}
-            </p>
-          </div>
-
-          <div>
-            <label htmlFor="content" className="text-sm font-medium text-foreground">
-              Content
-            </label>
-            <textarea
-              id="content"
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              placeholder="Content"
-              rows={12}
-              className={`mt-2 ${inputClassName} resize-y`}
-            />
-          </div>
+          <ArticleFormFields
+            fileInputRef={fileInputRef}
+            thumbnail={thumbnail}
+            onUploadClick={handleUploadClick}
+            onFileChange={handleFileChange}
+            category={category}
+            onCategoryChange={(event) => setCategory(event.target.value)}
+            author={DEFAULT_AUTHOR}
+            title={title}
+            onTitleChange={(event) => setTitle(event.target.value)}
+            introduction={introduction}
+            onIntroductionChange={(event) =>
+              setIntroduction(event.target.value.slice(0, INTRO_MAX_LENGTH))
+            }
+            content={content}
+            onContentChange={(event) => setContent(event.target.value)}
+          />
         </form>
       </div>
     </div>

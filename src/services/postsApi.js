@@ -78,6 +78,25 @@ export async function createPost({ title, description, content, category, author
   return response.data
 }
 
+// อัปเดตบทความ — Admin Edit article ใช้
+export async function updatePost(id, { title, description, content, category, author, image }) {
+  const response = await axios.put(`${API_BASE_URL}/posts/${id}`, {
+    title,
+    description,
+    content,
+    category,
+    author,
+    image: image || DEFAULT_POST_IMAGE,
+  })
+  return response.data
+}
+
+// ลบบทความ — Admin Delete article ใช้
+export async function deletePost(id) {
+  const response = await axios.delete(`${API_BASE_URL}/posts/${id}`)
+  return response.data
+}
+
 // แปลง content จาก API (markdown) เป็น sections สำหรับ BlogContent
 // แบ่งเป็น intro, หัวข้อก่อนรูป, หัวข้อหลังรูป
 export function parsePostContent(description, content) {
