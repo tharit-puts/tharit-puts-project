@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  Bell,
   ChevronDown,
   LogOut,
   Menu,
@@ -18,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/contexts/AuthContext'
+import { NotificationDropdown } from '@/components/NotificationDropdown'
 import hhLogo from '@/assets/hh..png'
 import defaultAvatar from '@/assets/defaultAvatar.png'
 
@@ -78,22 +78,23 @@ function GuestNav({ isMenuOpen, setIsMenuOpen }) {
 }
 
 // เมนูสำหรับ member (login แล้ว) — แสดง avatar, แจ้งเตือน, dropdown profile
-function MemberNav({ user, hasNotifications, onLogout, onProfileClick, onResetPasswordClick }) {
+function MemberNav({
+  user,
+  hasNotifications,
+  onLogout,
+  onProfileClick,
+  onResetPasswordClick,
+  onNotificationsOpen,
+}) {
   const displayName = user.name || user.username || 'Member'
   const avatarSrc = user.avatar || defaultAvatar
 
   return (
     <div className="flex items-center gap-3 md:gap-4">
-      <button
-        type="button"
-        aria-label="Notifications"
-        className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#DAD6D1] bg-white text-[#75716B] transition-colors hover:bg-[#F9F8F6]"
-      >
-        <Bell className="h-5 w-5" />
-        {hasNotifications ? (
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
-        ) : null}
-      </button>
+      <NotificationDropdown
+        hasNotifications={hasNotifications}
+        onOpen={onNotificationsOpen}
+      />
 
       <DropdownMenu>
         <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-full py-1 pr-1 outline-none transition-colors hover:opacity-80 md:gap-3">
@@ -141,7 +142,7 @@ function MemberNav({ user, hasNotifications, onLogout, onProfileClick, onResetPa
 export function NavBar() {
   const navigate = useNavigate()
   // อ่านสถานะ login จาก AuthContext — แสดง GuestNav หรือ MemberNav ตาม user
-  const { user, logout, hasNotifications } = useAuth()
+  const { user, logout, hasNotifications, markNotificationsRead } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   function handleLogout() {
@@ -171,6 +172,7 @@ export function NavBar() {
             onLogout={handleLogout}
             onProfileClick={handleProfileClick}
             onResetPasswordClick={handleResetPasswordClick}
+            onNotificationsOpen={markNotificationsRead}
           />
         ) : (
           <GuestNav isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />

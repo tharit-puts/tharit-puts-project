@@ -1,6 +1,7 @@
 // Context จัดการสถานะ login ทั้งแอป — ใช้ร่วมกับ NavBar, LoginPage, SignUpPage
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import {
+  clearNotifications,
   clearSession,
   getCurrentUser,
   getHasNotifications,
@@ -36,9 +37,22 @@ export function AuthProvider({ children }) {
     setUser(getCurrentUser())
   }, [])
 
+  // ลบจุดแดงแจ้งเตือน — NotificationDropdown เรียกเมื่อเปิด dropdown
+  const markNotificationsRead = useCallback(() => {
+    clearNotifications()
+    setHasNotifications(false)
+  }, [])
+
   const value = useMemo(
-    () => ({ user, login, logout, updateProfile, hasNotifications }),
-    [user, login, logout, updateProfile, hasNotifications],
+    () => ({
+      user,
+      login,
+      logout,
+      updateProfile,
+      hasNotifications,
+      markNotificationsRead,
+    }),
+    [user, login, logout, updateProfile, hasNotifications, markNotificationsRead],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

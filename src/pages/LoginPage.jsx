@@ -1,4 +1,4 @@
-// หน้า Log in — แสดงฟอร์มอีเมล/รหัสผ่าน พร้อมลิงก์ไป Sign up
+// หน้า Log in — แสดงฟอร์ม email/username + รหัสผ่าน พร้อมลิงก์ไป Sign up
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { NavBar } from '@/components/NavBar'
@@ -16,7 +16,7 @@ export function LoginPage() {
   // แสดง loading สั้นๆ ตอนเข้าหน้า — ใช้ usePageLoading hook
   const isLoading = usePageLoading([location.pathname])
 
-  const [email, setEmail] = useState('')
+  const [emailOrUsername, setEmailOrUsername] = useState('')
   const [password, setPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [hasLoginError, setHasLoginError] = useState(false)
@@ -27,8 +27,8 @@ export function LoginPage() {
     setHasLoginError(false)
   }
 
-  function handleEmailChange(event) {
-    setEmail(event.target.value)
+  function handleEmailOrUsernameChange(event) {
+    setEmailOrUsername(event.target.value)
     if (hasLoginError) {
       clearLoginError()
     }
@@ -48,7 +48,7 @@ export function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      const user = await loginUser({ email, password })
+      const user = await loginUser({ email: emailOrUsername, password })
       login(user)
       navigate('/')
     } catch (error) {
@@ -80,11 +80,11 @@ export function LoginPage() {
           <AuthFormCard title="Log in">
             <form className="space-y-5" onSubmit={handleSubmit} noValidate>
               <AuthInput
-                id="email"
-                label="Email"
-                placeholder="Email"
-                value={email}
-                onChange={handleEmailChange}
+                id="email-or-username"
+                label="Email or Username"
+                placeholder="Email or Username"
+                value={emailOrUsername}
+                onChange={handleEmailOrUsernameChange}
                 invalid={hasLoginError}
               />
               <AuthInput

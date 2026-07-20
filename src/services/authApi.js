@@ -8,7 +8,7 @@ export const EMAIL_TAKEN_MESSAGE =
   'Email is already taken, Please try another email.'
 
 export const INVALID_CREDENTIALS_MESSAGE =
-  'Incorrect email or password. Please try again.'
+  'Incorrect email, username, or password. Please try again.'
 
 export const WRONG_PASSWORD_MESSAGE = 'Current password is incorrect.'
 
@@ -42,6 +42,11 @@ export function getCurrentUser() {
 // ตรวจว่ามีจุดแดงแจ้งเตือนที่ NavBar หรือไม่
 export function getHasNotifications() {
   return localStorage.getItem(NOTIFICATIONS_KEY) === 'true'
+}
+
+// ลบจุดแดงแจ้งเตือน — NotificationDropdown เรียกเมื่อเปิด dropdown
+export function clearNotifications() {
+  localStorage.setItem(NOTIFICATIONS_KEY, 'false')
 }
 
 // บันทึก session หลัง login/signup — AuthContext.login เรียกใช้
@@ -221,8 +226,12 @@ export async function registerUser({ name, username, email, password }) {
 
 // fallback login จาก localStorage เมื่อ API ไม่มี endpoint login (404)
 function loginLocally({ email, password }) {
-  const normalizedEmail = email.trim().toLowerCase()
-  const user = getStoredUsers().find((entry) => entry.email === normalizedEmail)
+  const identifier = email.trim().toLowerCase()
+  const user = getStoredUsers().find(
+    (entry) =>
+      entry.email === identifier ||
+      entry.username?.trim().toLowerCase() === identifier,
+  )
 
   if (!user || user.password !== password) {
     const error = new Error(INVALID_CREDENTIALS_MESSAGE)
