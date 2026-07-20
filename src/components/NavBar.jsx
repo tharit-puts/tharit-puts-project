@@ -6,6 +6,7 @@ import {
   LogOut,
   Menu,
   RotateCcw,
+  SquareArrowOutUpRight,
   User,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -84,6 +85,7 @@ function MemberNav({
   onLogout,
   onProfileClick,
   onResetPasswordClick,
+  onAdminPanelClick,
   onNotificationsOpen,
 }) {
   const displayName = user.name || user.username || 'Member'
@@ -124,6 +126,11 @@ function MemberNav({
             Reset password
           </DropdownMenuItem>
 
+          <DropdownMenuItem className={menuItemClassName} onClick={onAdminPanelClick}>
+            <SquareArrowOutUpRight className="h-4 w-4" />
+            Admin panel
+          </DropdownMenuItem>
+
           <DropdownMenuSeparator className="bg-[#DAD6D1]" />
 
           <DropdownMenuItem
@@ -158,6 +165,10 @@ export function NavBar() {
     navigate('/reset-password')
   }
 
+  function handleAdminPanelClick() {
+    navigate('/admin/login')
+  }
+
   return (
     <header className="border-b-2 border-border bg-background">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:px-10">
@@ -172,6 +183,7 @@ export function NavBar() {
             onLogout={handleLogout}
             onProfileClick={handleProfileClick}
             onResetPasswordClick={handleResetPasswordClick}
+            onAdminPanelClick={handleAdminPanelClick}
             onNotificationsOpen={markNotificationsRead}
           />
         ) : (
