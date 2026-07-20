@@ -1,3 +1,4 @@
+// Toast แจ้งเตือนมุมขวาล่าง — App.jsx mount ไว้, BlogInteraction เรียก toast.success
 import { Toaster as Sonner } from 'sonner'
 
 const Toaster = ({ ...props }) => {

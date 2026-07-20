@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  Bell,
   ChevronDown,
   LogOut,
   Menu,
@@ -18,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/contexts/AuthContext'
+import { NotificationDropdown } from '@/components/NotificationDropdown'
 import hhLogo from '@/assets/hh..png'
 import defaultAvatar from '@/assets/defaultAvatar.png'
 
@@ -28,6 +28,7 @@ const signUpButtonClassName = 'w-full rounded-full px-8 py-5 font-light'
 const menuItemClassName =
   'cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-sm text-[#43403B]'
 
+// เมนูสำหรับ guest (ยังไม่ login) — แสดงปุ่ม Log in / Sign up
 function GuestNav({ isMenuOpen, setIsMenuOpen }) {
   return (
     <>
@@ -76,22 +77,24 @@ function GuestNav({ isMenuOpen, setIsMenuOpen }) {
   )
 }
 
-function MemberNav({ user, hasNotifications, onLogout }) {
+// เมนูสำหรับ member (login แล้ว) — แสดง avatar, แจ้งเตือน, dropdown profile
+function MemberNav({
+  user,
+  hasNotifications,
+  onLogout,
+  onProfileClick,
+  onResetPasswordClick,
+  onNotificationsOpen,
+}) {
   const displayName = user.name || user.username || 'Member'
   const avatarSrc = user.avatar || defaultAvatar
 
   return (
     <div className="flex items-center gap-3 md:gap-4">
-      <button
-        type="button"
-        aria-label="Notifications"
-        className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#DAD6D1] bg-white text-[#75716B] transition-colors hover:bg-[#F9F8F6]"
-      >
-        <Bell className="h-5 w-5" />
-        {hasNotifications ? (
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
-        ) : null}
-      </button>
+      <NotificationDropdown
+        hasNotifications={hasNotifications}
+        onOpen={onNotificationsOpen}
+      />
 
       <DropdownMenu>
         <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-full py-1 pr-1 outline-none transition-colors hover:opacity-80 md:gap-3">
@@ -111,12 +114,12 @@ function MemberNav({ user, hasNotifications, onLogout }) {
           sideOffset={8}
           className="min-w-48 rounded-xl border border-[#DAD6D1] bg-white p-2 shadow-[0_8px_24px_rgba(38,35,30,0.12)]"
         >
-          <DropdownMenuItem className={menuItemClassName}>
+          <DropdownMenuItem className={menuItemClassName} onClick={onProfileClick}>
             <User className="h-4 w-4" />
             Profile
           </DropdownMenuItem>
 
-          <DropdownMenuItem className={menuItemClassName}>
+          <DropdownMenuItem className={menuItemClassName} onClick={onResetPasswordClick}>
             <RotateCcw className="h-4 w-4" />
             Reset password
           </DropdownMenuItem>
@@ -138,12 +141,21 @@ function MemberNav({ user, hasNotifications, onLogout }) {
 
 export function NavBar() {
   const navigate = useNavigate()
-  const { user, logout, hasNotifications } = useAuth()
+  // อ่านสถานะ login จาก AuthContext — แสดง GuestNav หรือ MemberNav ตาม user
+  const { user, logout, hasNotifications, markNotificationsRead } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   function handleLogout() {
     logout()
     navigate('/')
+  }
+
+  function handleProfileClick() {
+    navigate('/profile')
+  }
+
+  function handleResetPasswordClick() {
+    navigate('/reset-password')
   }
 
   return (
@@ -158,6 +170,9 @@ export function NavBar() {
             user={user}
             hasNotifications={hasNotifications}
             onLogout={handleLogout}
+            onProfileClick={handleProfileClick}
+            onResetPasswordClick={handleResetPasswordClick}
+            onNotificationsOpen={markNotificationsRead}
           />
         ) : (
           <GuestNav isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />

@@ -6,6 +6,8 @@
 @import "@fontsource/poppins/600.css";
 @import "@fontsource/poppins/700.css";
 
+/* สไตล์ global ของแอป — โหลดจาก main.jsx
+   กำหนดฟอนต์ Poppins, สี theme, และ CSS variables สำหรับ shadcn/ui */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

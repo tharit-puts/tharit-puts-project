@@ -1,3 +1,5 @@
+// หน้ารายละเอียดบทความ — ดึงข้อมูลจาก API ตาม id ใน URL /post/:id
+// เชื่อมกับ: postsApi, blogDetails (comments), BlogContent, CommentSection
 import { useEffect, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { NavBar } from '@/components/NavBar'
@@ -21,6 +23,7 @@ export function BlogDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isNotFound, setIsNotFound] = useState(false)
 
+  // โหลดบทความใหม่ทุกครั้งที่ id ใน URL เปลี่ยน
   useEffect(() => {
     async function loadPost() {
       setIsLoading(true)
@@ -41,10 +44,12 @@ export function BlogDetailPage() {
     loadPost()
   }, [id])
 
+  // ถ้าไม่พบบทความ ให้ redirect กลับหน้าแรก
   if (isNotFound) {
     return <Navigate to="/" replace />
   }
 
+  // แปลง content จาก API + สุ่ม comments ตัวอย่างตาม blog id
   const detail = post ? parsePostContent(post.description, post.content) : null
   const comments = post ? pickComments(post.id) : []
 

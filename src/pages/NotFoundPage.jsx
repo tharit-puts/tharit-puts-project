@@ -1,3 +1,4 @@
+// หน้า 404 — App.jsx จับ URL ที่ไม่ตรง route ใดๆ ด้วย path="*"
 import { Link } from 'react-router-dom'
 import { CircleAlert } from 'lucide-react'
 import { NavBar } from '@/components/NavBar'

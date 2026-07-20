@@ -1,3 +1,4 @@
+// ปุ่ม UI สำเร็จรูปจาก shadcn/base-ui — ใช้ทั่วแอป (NavBar, Login, SignUp, AuthModal)
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva } from "class-variance-authority";
 

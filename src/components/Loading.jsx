@@ -1,3 +1,4 @@
+// แสดงข้อความ Loading — ใช้ใน LoginPage, SignUpPage, BlogDetailPage, ArticleSection
 export function Loading({ className = '' }) {
   return (
     <p

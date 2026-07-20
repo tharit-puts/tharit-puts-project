@@ -1,16 +1,27 @@
+// บริการ Auth — สมัคร/เข้าสู่ระบบผ่าน API หรือ localStorage (fallback)
+// เชื่อมกับ: AuthContext, LoginPage, SignUpPage
 import axios from 'axios'
-import { API_BASE_URL } from '@/services/postsApi'
+import { API_BASE_URL } from '@/services/postsApi' // ใช้ URL เดียวกับ posts API
 
+// ข้อความ error ที่หน้า Login/SignUp แสดงให้ user เห็น
 export const EMAIL_TAKEN_MESSAGE =
   'Email is already taken, Please try another email.'
 
 export const INVALID_CREDENTIALS_MESSAGE =
-  'Incorrect email or password. Please try again.'
+  'Incorrect email, username, or password. Please try again.'
 
+export const WRONG_PASSWORD_MESSAGE = 'Current password is incorrect.'
+
+export const PASSWORD_MISMATCH_MESSAGE = 'New passwords do not match.'
+
+export const PASSWORD_TOO_SHORT_MESSAGE = 'Password must be at least 6 characters.'
+
+// key ใน localStorage สำหรับเก็บ user ที่สมัคร, session ปัจจุบัน, และสถานะแจ้งเตือน
 const STORAGE_KEY = 'hh_registered_users'
 const SESSION_KEY = 'hh_current_user'
 const NOTIFICATIONS_KEY = 'hh_has_notifications'
 
+// ตัด password ออกก่อนส่ง user กลับ — ไม่เก็บรหัสผ่านใน session
 function sanitizeUser(user) {
   if (!user) return null
 
@@ -18,6 +29,7 @@ function sanitizeUser(user) {
   return safeUser
 }
 
+// อ่าน user ที่ login อยู่ — AuthContext เรียกตอน mount และหลัง login
 export function getCurrentUser() {
   try {
     const data = localStorage.getItem(SESSION_KEY)
@@ -27,18 +39,123 @@ export function getCurrentUser() {
   }
 }
 
+// ตรวจว่ามีจุดแดงแจ้งเตือนที่ NavBar หรือไม่
 export function getHasNotifications() {
   return localStorage.getItem(NOTIFICATIONS_KEY) === 'true'
 }
 
+// ลบจุดแดงแจ้งเตือน — NotificationDropdown เรียกเมื่อเปิด dropdown
+export function clearNotifications() {
+  localStorage.setItem(NOTIFICATIONS_KEY, 'false')
+}
+
+// บันทึก session หลัง login/signup — AuthContext.login เรียกใช้
 export function saveSession(user) {
   localStorage.setItem(SESSION_KEY, JSON.stringify(sanitizeUser(user)))
   localStorage.setItem(NOTIFICATIONS_KEY, 'true')
 }
 
+// ลบ session ตอน logout — AuthContext.logout เรียกใช้
 export function clearSession() {
   localStorage.removeItem(SESSION_KEY)
   localStorage.removeItem(NOTIFICATIONS_KEY)
+}
+
+// แสดงอีเมล 4 ตัวแรก ที่เหลือเป็น * — ใช้ในหน้า Profile (อีเมลแก้ไม่ได้)
+export function maskEmail(email) {
+  if (!email || !email.includes('@')) return email
+
+  const [localPart, domain] = email.split('@')
+  const visible = localPart.slice(0, 4)
+
+  return `${visible}****@${domain}`
+}
+
+// อัปเดต name, username, avatar — ProfilePage เรียกใช้
+export function updateUserProfile({ name, username, avatar }) {
+  const currentUser = getCurrentUser()
+  if (!currentUser) {
+    throw new Error('Not logged in')
+  }
+
+  const updatedUser = {
+    ...currentUser,
+    name: name.trim(),
+    username: username.trim(),
+    ...(avatar !== undefined ? { avatar } : {}),
+  }
+
+  saveSession(updatedUser)
+
+  const normalizedEmail = currentUser.email?.trim().toLowerCase()
+  const users = getStoredUsers()
+  const index = users.findIndex((entry) => entry.email === normalizedEmail)
+
+  if (index !== -1) {
+    users[index] = {
+      ...users[index],
+      name: updatedUser.name,
+      username: updatedUser.username,
+      avatar: updatedUser.avatar,
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(users))
+  }
+
+  return sanitizeUser(updatedUser)
+}
+
+// ตรวจรหัสผ่านปัจจุบัน — ResetPasswordPage เรียกก่อนเปิด modal
+export function verifyCurrentPassword(currentPassword) {
+  const currentUser = getCurrentUser()
+  if (!currentUser?.email) return false
+
+  const normalizedEmail = currentUser.email.trim().toLowerCase()
+  const users = getStoredUsers()
+  const storedUser = users.find((entry) => entry.email === normalizedEmail)
+
+  if (!storedUser) return false
+
+  return storedUser.password === currentPassword
+}
+
+// เปลี่ยนรหัสผ่าน — ResetPasswordPage เรียกใช้
+export async function resetUserPassword({ currentPassword, newPassword }) {
+  const currentUser = getCurrentUser()
+  if (!currentUser?.email) {
+    throw new Error('Not logged in')
+  }
+
+  const normalizedEmail = currentUser.email.trim().toLowerCase()
+  const users = getStoredUsers()
+  const index = users.findIndex((entry) => entry.email === normalizedEmail)
+
+  if (index === -1) {
+    try {
+      await axios.post(`${API_BASE_URL}/auth/reset-password`, {
+        email: currentUser.email,
+        currentPassword,
+        newPassword,
+      })
+      return
+    } catch (error) {
+      if (error.response?.status === 404) {
+        const wrongError = new Error(WRONG_PASSWORD_MESSAGE)
+        wrongError.code = 'WRONG_PASSWORD'
+        throw wrongError
+      }
+
+      throw error
+    }
+  }
+
+  if (users[index].password !== currentPassword) {
+    const wrongError = new Error(WRONG_PASSWORD_MESSAGE)
+    wrongError.code = 'WRONG_PASSWORD'
+    throw wrongError
+  }
+
+  users[index].password = newPassword
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(users))
 }
 
 function getStoredUsers() {
@@ -49,6 +166,7 @@ function getStoredUsers() {
   }
 }
 
+// fallback เมื่อ API ไม่มี endpoint register (404) — เก็บ user ใน localStorage แทน
 function registerLocally({ name, username, email, password }) {
   const normalizedEmail = email.trim().toLowerCase()
   const users = getStoredUsers()
@@ -81,6 +199,7 @@ function isEmailTakenError(error) {
   )
 }
 
+// สมัครสมาชิก — SignUpPage เรียกใช้ แล้วส่ง user ไป AuthContext.login
 export async function registerUser({ name, username, email, password }) {
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/register`, {
@@ -105,9 +224,14 @@ export async function registerUser({ name, username, email, password }) {
   }
 }
 
+// fallback login จาก localStorage เมื่อ API ไม่มี endpoint login (404)
 function loginLocally({ email, password }) {
-  const normalizedEmail = email.trim().toLowerCase()
-  const user = getStoredUsers().find((entry) => entry.email === normalizedEmail)
+  const identifier = email.trim().toLowerCase()
+  const user = getStoredUsers().find(
+    (entry) =>
+      entry.email === identifier ||
+      entry.username?.trim().toLowerCase() === identifier,
+  )
 
   if (!user || user.password !== password) {
     const error = new Error(INVALID_CREDENTIALS_MESSAGE)
@@ -124,6 +248,7 @@ function isInvalidCredentialsError(error) {
   return status === 401 || status === 400
 }
 
+// เข้าสู่ระบบ — LoginPage เรียกใช้ แล้วส่ง user ไป AuthContext.login
 export async function loginUser({ email, password }) {
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/login`, {
