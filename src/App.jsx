@@ -20,7 +20,7 @@ import { CreateCategoryPage } from '@/pages/admin/CreateCategoryPage'
 import { EditCategoryPage } from '@/pages/admin/EditCategoryPage'
 import { AdminProfilePage } from '@/pages/admin/AdminProfilePage'
 import { AdminNotificationPage } from '@/pages/admin/AdminNotificationPage'
-import { AdminPlaceholderPage } from '@/pages/admin/AdminPlaceholderPage'
+import { AdminResetPasswordPage } from '@/pages/admin/AdminResetPasswordPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -77,10 +77,7 @@ function App() {
           <Route path="categories/:id/edit" element={<EditCategoryPage />} />
           <Route path="profile" element={<AdminProfilePage />} />
           <Route path="notifications" element={<AdminNotificationPage />} />
-          <Route
-            path="reset-password"
-            element={<AdminPlaceholderPage title="Reset password" />}
-          />
+          <Route path="reset-password" element={<AdminResetPasswordPage />} />
         </Route>
 
         {/* หน้า 404 — จับ URL ที่ไม่มีใน Router */}
