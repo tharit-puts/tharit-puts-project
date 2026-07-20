@@ -42,8 +42,8 @@ export function AdminSidebar() {
       <nav className="mt-8 flex flex-col gap-1">
         {navItems.map(({ label, path, icon: Icon }) => {
           const isActive =
-            path === '/admin/articles'
-              ? location.pathname.startsWith('/admin/articles')
+            path === '/admin/articles' || path === '/admin/categories'
+              ? location.pathname.startsWith(path)
               : location.pathname === path
 
           return (
