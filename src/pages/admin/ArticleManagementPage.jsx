@@ -105,8 +105,8 @@ export function ArticleManagementPage() {
 
   return (
     <>
-      <div className="px-8 py-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex h-screen flex-col px-8 py-10">
+      <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-foreground">Article management</h1>
         <Button
           type="button"
@@ -118,7 +118,7 @@ export function ArticleManagementPage() {
         </Button>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center">
+      <div className="mt-6 flex shrink-0 flex-col gap-3 lg:flex-row lg:items-center">
         <div className="relative flex-1">
           <input
             type="search"
@@ -166,54 +166,56 @@ export function ArticleManagementPage() {
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-[#EFEEEB]">
-        <div className="grid grid-cols-[minmax(0,1fr)_140px_140px_88px] gap-4 border-b border-[#EFEEEB] bg-[#F9F8F6] px-6 py-4 text-sm font-medium text-[#75716B]">
+      <div className="mt-6 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[#EFEEEB]">
+        <div className="grid shrink-0 grid-cols-[minmax(0,1fr)_140px_140px_88px] gap-4 border-b border-[#EFEEEB] bg-[#F9F8F6] px-6 py-4 text-sm font-medium text-[#75716B]">
           <span>Article title</span>
           <span>Category</span>
           <span>Status</span>
           <span className="sr-only">Actions</span>
         </div>
 
-        {isLoading ? (
-          <div className="px-6 py-16">
-            <Loading />
-          </div>
-        ) : filteredPosts.length > 0 ? (
-          filteredPosts.map((post, index) => (
-            <div
-              key={post.id}
-              className={`grid grid-cols-[minmax(0,1fr)_140px_140px_88px] items-center gap-4 px-6 py-4 ${
-                index % 2 === 1 ? 'bg-[#FCFBFA]' : 'bg-white'
-              }`}
-            >
-              <p className="truncate text-sm font-medium text-foreground">{post.title}</p>
-              <p className="text-sm text-[#43403B]">{post.category}</p>
-              <StatusBadge status={getPostStatus(post.id)} />
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  aria-label={`Edit ${post.title}`}
-                  onClick={() => navigate(`/admin/articles/${post.id}/edit`)}
-                  className="text-[#75716B] transition-colors hover:text-foreground"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  aria-label={`Delete ${post.title}`}
-                  onClick={() => setDeleteTarget(post)}
-                  className="text-[#75716B] transition-colors hover:text-foreground"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="px-6 py-16">
+              <Loading />
             </div>
-          ))
-        ) : (
-          <p className="px-6 py-16 text-center text-sm text-[#75716B]">
-            No articles found.
-          </p>
-        )}
+          ) : filteredPosts.length > 0 ? (
+            filteredPosts.map((post, index) => (
+              <div
+                key={post.id}
+                className={`grid grid-cols-[minmax(0,1fr)_140px_140px_88px] items-center gap-4 px-6 py-4 ${
+                  index % 2 === 1 ? 'bg-[#FCFBFA]' : 'bg-white'
+                }`}
+              >
+                <p className="truncate text-sm font-medium text-foreground">{post.title}</p>
+                <p className="text-sm text-[#43403B]">{post.category}</p>
+                <StatusBadge status={getPostStatus(post.id)} />
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    aria-label={`Edit ${post.title}`}
+                    onClick={() => navigate(`/admin/articles/${post.id}/edit`)}
+                    className="text-[#75716B] transition-colors hover:text-foreground"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Delete ${post.title}`}
+                    onClick={() => setDeleteTarget(post)}
+                    className="text-[#75716B] transition-colors hover:text-foreground"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="px-6 py-16 text-center text-sm text-[#75716B]">
+              No articles found.
+            </p>
+          )}
+        </div>
       </div>
       </div>
 
