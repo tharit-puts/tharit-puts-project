@@ -1,3 +1,5 @@
+// ส่วนรายการบทความบนหน้าแรก — filter, search, pagination
+// เชื่อมกับ: HomePage → ArticleSearch, BlogCat, postsApi
 import { useEffect, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { ArticleSearch } from '@/components/ArticleSearch'
@@ -19,6 +21,7 @@ export function ArticleSection() {
   const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
 
+  // debounce การค้นหา 500ms — ลดจำนวน request ไป API
   useEffect(() => {
     const timer = setTimeout(() => {
       setKeyword(searchQuery)
@@ -27,6 +30,7 @@ export function ArticleSection() {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
+  // โหลดบทความเมื่อ page, category หรือ keyword เปลี่ยน
   useEffect(() => {
     async function loadPosts() {
       setIsLoading(true)

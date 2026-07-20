@@ -1,3 +1,5 @@
+// ข้อมูลบทความแบบ static (fallback/ตัวอย่าง) — ปัจจุบัน HomePage ใช้ API แทนแล้ว
+// ยังเก็บไว้สำหรับ reference หรือใช้ทดสอบ offline
 import catBlackWhite from '@/assets/catBlackWhite.png'
 import catTabby from '@/assets/catTabby.png'
 import catTabbyHead from '@/assets/catTabbyHead.png'
@@ -14,6 +16,7 @@ const images = [
   catWithDog,
 ]
 
+// บทความ 6 ชิ้นแรก — แสดงตอนโหลดหน้าแรกครั้งแรก (ก่อน View more)
 export const initialBlogs = [
   {
     id: 1,
@@ -84,6 +87,7 @@ export const initialBlogs = [
   },
 ]
 
+// บทความเพิ่มเติม — โหลดเมื่อกด View more
 export const additionalBlogs = [
   {
     id: 7,
@@ -197,6 +201,7 @@ export const additionalBlogs = [
   },
 ]
 
+// รวมบทความทั้งหมด — getBlogById ใช้ค้นหาตาม id
 export const allBlogs = [...initialBlogs, ...additionalBlogs]
 
 export function getBlogById(id) {

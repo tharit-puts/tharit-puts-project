@@ -28,6 +28,7 @@ const signUpButtonClassName = 'w-full rounded-full px-8 py-5 font-light'
 const menuItemClassName =
   'cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-sm text-[#43403B]'
 
+// เมนูสำหรับ guest (ยังไม่ login) — แสดงปุ่ม Log in / Sign up
 function GuestNav({ isMenuOpen, setIsMenuOpen }) {
   return (
     <>
@@ -76,6 +77,7 @@ function GuestNav({ isMenuOpen, setIsMenuOpen }) {
   )
 }
 
+// เมนูสำหรับ member (login แล้ว) — แสดง avatar, แจ้งเตือน, dropdown profile
 function MemberNav({ user, hasNotifications, onLogout }) {
   const displayName = user.name || user.username || 'Member'
   const avatarSrc = user.avatar || defaultAvatar
@@ -138,6 +140,7 @@ function MemberNav({ user, hasNotifications, onLogout }) {
 
 export function NavBar() {
   const navigate = useNavigate()
+  // อ่านสถานะ login จาก AuthContext — แสดง GuestNav หรือ MemberNav ตาม user
   const { user, logout, hasNotifications } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 

@@ -1,3 +1,5 @@
+// ข้อมูล mock สำหรับ comments และเนื้อหาบทความ
+// เชื่อมกับ: BlogDetailPage (pickComments), getBlogDetail (legacy)
 const commentPool = [
   {
     name: "Jacob Lash",
@@ -41,6 +43,7 @@ const commentPool = [
   },
 ];
 
+// สุ่มแบบ deterministic จาก seed — ได้ผลเหมือนเดิมทุกครั้งสำหรับ id เดียวกัน
 function seededRandom(seed) {
   let value = seed;
   return () => {
@@ -49,6 +52,7 @@ function seededRandom(seed) {
   };
 }
 
+// สุ่ม 3 comments ตาม blog id — BlogDetailPage ส่งให้ CommentSection
 export function pickComments(blogId) {
   const random = seededRandom(blogId * 7919)
   const shuffled = [...commentPool].sort(() => random() - 0.5)
@@ -60,6 +64,7 @@ function getEmotionCount(blogId) {
   return Math.floor(random() * 400) + 120;
 }
 
+// ส่วนเนื้อหาตัวอย่างแยกตามหมวด — getBlogDetail ใช้เมื่อไม่ได้ดึงจาก API
 const catSectionTemplates = [
   {
     title: "Independent Yet Affectionate",
@@ -242,6 +247,7 @@ function buildIntro(title, excerpt, category) {
   return `${excerpt.replace(/\.\.\.$/, ".")} Here is a thoughtful guide to help you understand the essentials and apply them in your everyday life.`;
 }
 
+// สร้างเนื้อหาเต็มของบทความจากข้อมูล static — ใช้กับ blogs.js (legacy)
 export function getBlogDetail(blog) {
   if (blog.id === 2) {
     return {

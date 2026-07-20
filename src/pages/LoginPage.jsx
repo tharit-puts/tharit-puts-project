@@ -13,6 +13,7 @@ export function LoginPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const { login } = useAuth()
+  // แสดง loading สั้นๆ ตอนเข้าหน้า — ใช้ usePageLoading hook
   const isLoading = usePageLoading([location.pathname])
 
   const [email, setEmail] = useState('')
@@ -40,6 +41,7 @@ export function LoginPage() {
     }
   }
 
+  // ส่งข้อมูลไป authApi → login ใน AuthContext → กลับหน้าแรก
   async function handleSubmit(event) {
     event.preventDefault()
 
