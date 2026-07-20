@@ -33,9 +33,48 @@ export async function fetchPosts({ page, category, keyword }) {
   return response.data
 }
 
+// ดึงบทความทั้งหมด — Admin Article management ใช้
+export async function fetchAllPosts() {
+  let page = 1
+  let totalPages = 1
+  const allPosts = []
+
+  while (page <= totalPages) {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: '30',
+    })
+
+    const response = await axios.get(`${API_BASE_URL}/posts?${params}`)
+    const data = response.data
+
+    allPosts.push(...data.posts)
+    totalPages = data.totalPages
+    page += 1
+  }
+
+  return allPosts
+}
+
 // ดึงบทความเดียวตาม id — BlogDetailPage เรียกจาก URL /post/:id
 export async function fetchPostById(id) {
   const response = await axios.get(`${API_BASE_URL}/posts/${id}`)
+  return response.data
+}
+
+export const DEFAULT_POST_IMAGE =
+  'https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449771/my-blog-post/e739huvlalbfz9eynysc.jpg'
+
+// สร้างบทความใหม่ — Admin Create article ใช้
+export async function createPost({ title, description, content, category, author, image }) {
+  const response = await axios.post(`${API_BASE_URL}/posts`, {
+    title,
+    description,
+    content,
+    category,
+    author,
+    image: image || DEFAULT_POST_IMAGE,
+  })
   return response.data
 }
 

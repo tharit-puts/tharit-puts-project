@@ -1,6 +1,7 @@
 // หน้า Log in สำหรับ admin — เข้าจาก NavBar > Admin panel
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { NavBar } from '@/components/NavBar'
 import { toast } from 'sonner'
 import { AuthInput } from '@/components/AuthForm'
 import { Button } from '@/components/ui/button'
@@ -35,7 +36,7 @@ export function AdminLoginPage() {
 
     try {
       loginAdmin({ emailOrUsername, password })
-      navigate('/admin')
+      navigate('/admin/articles')
     } catch (error) {
       if (
         error.code === 'ADMIN_INVALID_CREDENTIALS' ||
@@ -57,6 +58,7 @@ export function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <NavBar />
       <main className="flex min-h-screen items-center justify-center px-6 py-16">
         <div className="mx-auto w-full max-w-md rounded-2xl bg-[#EFEEEB] px-8 py-10">
           <p className="text-center text-sm font-medium text-[#EB6B47]">Admin panel</p>
