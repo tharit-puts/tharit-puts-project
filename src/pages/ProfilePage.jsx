@@ -2,7 +2,7 @@
 // เชื่อมกับ: NavBar (Profile menu), AuthContext, authApi
 import { useRef, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { RotateCcw, User } from 'lucide-react'
+import { CircleQuestionMark, Eye, EyeOff, RotateCcw, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { NavBar } from '@/components/NavBar'
 import { Loading } from '@/components/Loading'
@@ -18,6 +18,9 @@ const inputClassName =
 const sidebarItemClassName =
   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#43403B]'
 
+const nameFieldHint =
+  'This is your public display name. It will appear next to your comments on articles.'
+
 export function ProfilePage() {
   const location = useLocation()
   const { user, updateProfile } = useAuth()
@@ -28,6 +31,7 @@ export function ProfilePage() {
   const [username, setUsername] = useState(user?.username ?? '')
   const [avatar, setAvatar] = useState(user?.avatar ?? '')
   const [isSaving, setIsSaving] = useState(false)
+  const [isEmailVisible, setIsEmailVisible] = useState(false)
 
   if (!user) {
     return <Navigate to="/login" replace />
@@ -143,13 +147,30 @@ export function ProfilePage() {
                     <label htmlFor="name" className="text-sm font-medium text-foreground">
                       Name
                     </label>
-                    <input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                      className={`mt-2 ${inputClassName}`}
-                    />
+                    <div className="mt-2 flex items-center gap-2">
+                      <input
+                        id="name"
+                        type="text"
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
+                        className={inputClassName}
+                      />
+                      <div className="group relative shrink-0">
+                        <button
+                          type="button"
+                          aria-label="Name field information"
+                          className="text-[#75716B] transition-colors hover:text-foreground"
+                        >
+                          <CircleQuestionMark className="h-5 w-5" />
+                        </button>
+                        <div
+                          role="tooltip"
+                          className="pointer-events-none absolute right-0 bottom-full z-10 mb-2 hidden w-56 rounded-lg bg-[#43403B] px-3 py-2 text-xs leading-relaxed text-white shadow-md group-hover:block"
+                        >
+                          {nameFieldHint}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div>
@@ -170,9 +191,25 @@ export function ProfilePage() {
 
                   <div>
                     <p className="text-sm font-medium text-[#75716B]">Email</p>
-                    <p className="mt-2 text-base font-medium text-[#75716B]">
-                      {maskEmail(user.email ?? '')}
-                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <p className="text-base font-medium text-[#75716B]">
+                        {isEmailVisible
+                          ? user.email ?? ''
+                          : maskEmail(user.email ?? '')}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setIsEmailVisible((prev) => !prev)}
+                        aria-label={isEmailVisible ? 'Hide email' : 'Show email'}
+                        className="text-[#75716B] transition-colors hover:text-foreground"
+                      >
+                        {isEmailVisible ? (
+                          <Eye className="h-5 w-5" />
+                        ) : (
+                          <EyeOff className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <Button
