@@ -78,7 +78,7 @@ function GuestNav({ isMenuOpen, setIsMenuOpen }) {
 }
 
 // เมนูสำหรับ member (login แล้ว) — แสดง avatar, แจ้งเตือน, dropdown profile
-function MemberNav({ user, hasNotifications, onLogout }) {
+function MemberNav({ user, hasNotifications, onLogout, onProfileClick }) {
   const displayName = user.name || user.username || 'Member'
   const avatarSrc = user.avatar || defaultAvatar
 
@@ -113,7 +113,7 @@ function MemberNav({ user, hasNotifications, onLogout }) {
           sideOffset={8}
           className="min-w-48 rounded-xl border border-[#DAD6D1] bg-white p-2 shadow-[0_8px_24px_rgba(38,35,30,0.12)]"
         >
-          <DropdownMenuItem className={menuItemClassName}>
+          <DropdownMenuItem className={menuItemClassName} onClick={onProfileClick}>
             <User className="h-4 w-4" />
             Profile
           </DropdownMenuItem>
@@ -149,6 +149,10 @@ export function NavBar() {
     navigate('/')
   }
 
+  function handleProfileClick() {
+    navigate('/profile')
+  }
+
   return (
     <header className="border-b-2 border-border bg-background">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:px-10">
@@ -161,6 +165,7 @@ export function NavBar() {
             user={user}
             hasNotifications={hasNotifications}
             onLogout={handleLogout}
+            onProfileClick={handleProfileClick}
           />
         ) : (
           <GuestNav isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />

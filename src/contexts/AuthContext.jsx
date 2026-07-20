@@ -5,6 +5,7 @@ import {
   getCurrentUser,
   getHasNotifications,
   saveSession,
+  updateUserProfile,
 } from '@/services/authApi' // อ่าน/เขียน session ใน localStorage
 
 const AuthContext = createContext(null)
@@ -29,9 +30,15 @@ export function AuthProvider({ children }) {
     setHasNotifications(false)
   }, [])
 
+  // อัปเดต profile — ProfilePage เรียกหลังกด Save
+  const updateProfile = useCallback((updates) => {
+    updateUserProfile(updates)
+    setUser(getCurrentUser())
+  }, [])
+
   const value = useMemo(
-    () => ({ user, login, logout, hasNotifications }),
-    [user, login, logout, hasNotifications],
+    () => ({ user, login, logout, updateProfile, hasNotifications }),
+    [user, login, logout, updateProfile, hasNotifications],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

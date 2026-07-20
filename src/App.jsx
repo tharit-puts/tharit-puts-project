@@ -8,6 +8,7 @@ import { BlogDetailPage } from '@/pages/BlogDetailPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { SignUpPage } from '@/pages/SignUpPage'
 import { RegistrationSuccessPage } from '@/pages/RegistrationSuccessPage'
+import { ProfilePage } from '@/pages/ProfilePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -45,6 +46,9 @@ function App() {
 
         {/* หน้าสมัครสำเร็จ */}
         <Route path="/registration-success" element={<RegistrationSuccessPage />} />
+
+        {/* หน้าแก้ไข profile — ต้อง login ก่อน */}
+        <Route path="/profile" element={<ProfilePage />} />
 
         {/* หน้า 404 — จับ URL ที่ไม่มีใน Router */}
         <Route path="*" element={<NotFoundPage />} />

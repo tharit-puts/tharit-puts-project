@@ -50,6 +50,49 @@ export function clearSession() {
   localStorage.removeItem(NOTIFICATIONS_KEY)
 }
 
+// แสดงอีเมล 4 ตัวแรก ที่เหลือเป็น * — ใช้ในหน้า Profile (อีเมลแก้ไม่ได้)
+export function maskEmail(email) {
+  if (!email || !email.includes('@')) return email
+
+  const [localPart, domain] = email.split('@')
+  const visible = localPart.slice(0, 4)
+
+  return `${visible}****@${domain}`
+}
+
+// อัปเดต name, username, avatar — ProfilePage เรียกใช้
+export function updateUserProfile({ name, username, avatar }) {
+  const currentUser = getCurrentUser()
+  if (!currentUser) {
+    throw new Error('Not logged in')
+  }
+
+  const updatedUser = {
+    ...currentUser,
+    name: name.trim(),
+    username: username.trim(),
+    ...(avatar !== undefined ? { avatar } : {}),
+  }
+
+  saveSession(updatedUser)
+
+  const normalizedEmail = currentUser.email?.trim().toLowerCase()
+  const users = getStoredUsers()
+  const index = users.findIndex((entry) => entry.email === normalizedEmail)
+
+  if (index !== -1) {
+    users[index] = {
+      ...users[index],
+      name: updatedUser.name,
+      username: updatedUser.username,
+      avatar: updatedUser.avatar,
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(users))
+  }
+
+  return sanitizeUser(updatedUser)
+}
+
 function getStoredUsers() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
