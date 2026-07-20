@@ -9,6 +9,7 @@ import { ArticleFormFields, INTRO_MAX_LENGTH } from '@/components/admin/ArticleF
 import { DeleteArticleModal } from '@/components/admin/DeleteArticleModal'
 import { deletePost, fetchPostById, updatePost } from '@/services/postsApi'
 import { removePostStatus, setPostStatus } from '@/services/adminPosts'
+import { getAuthorName } from '@/services/adminProfile'
 
 export function EditArticlePage() {
   const { id } = useParams()
@@ -34,7 +35,7 @@ export function EditArticlePage() {
         const post = await fetchPostById(id)
         setThumbnail(post.image ?? '')
         setCategory(post.category ?? '')
-        setAuthor(post.author ?? '')
+        setAuthor(getAuthorName())
         setTitle(post.title ?? '')
         setIntroduction(post.description ?? '')
         setContent(post.content ?? '')

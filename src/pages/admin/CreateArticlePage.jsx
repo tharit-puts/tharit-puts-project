@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button'
 import { ArticleFormFields, INTRO_MAX_LENGTH } from '@/components/admin/ArticleFormFields'
 import { createPost } from '@/services/postsApi'
 import { setPostStatus } from '@/services/adminPosts'
-
-const DEFAULT_AUTHOR = 'Thompson P.'
+import { getAuthorName } from '@/services/adminProfile'
 
 export function CreateArticlePage() {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
+  const authorName = getAuthorName()
 
   const [thumbnail, setThumbnail] = useState('')
   const [category, setCategory] = useState('')
@@ -66,7 +66,7 @@ export function CreateArticlePage() {
         description: introduction.trim(),
         content: content.trim(),
         category,
-        author: DEFAULT_AUTHOR,
+        author: authorName,
         image: thumbnail || undefined,
       })
 
@@ -123,7 +123,7 @@ export function CreateArticlePage() {
             onFileChange={handleFileChange}
             category={category}
             onCategoryChange={(event) => setCategory(event.target.value)}
-            author={DEFAULT_AUTHOR}
+            author={authorName}
             title={title}
             onTitleChange={(event) => setTitle(event.target.value)}
             introduction={introduction}

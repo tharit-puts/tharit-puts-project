@@ -18,6 +18,7 @@ import { EditArticlePage } from '@/pages/admin/EditArticlePage'
 import { CategoryManagementPage } from '@/pages/admin/CategoryManagementPage'
 import { CreateCategoryPage } from '@/pages/admin/CreateCategoryPage'
 import { EditCategoryPage } from '@/pages/admin/EditCategoryPage'
+import { AdminProfilePage } from '@/pages/admin/AdminProfilePage'
 import { AdminPlaceholderPage } from '@/pages/admin/AdminPlaceholderPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { Toaster } from '@/components/ui/sonner'
@@ -73,7 +74,7 @@ function App() {
           <Route path="categories" element={<CategoryManagementPage />} />
           <Route path="categories/new" element={<CreateCategoryPage />} />
           <Route path="categories/:id/edit" element={<EditCategoryPage />} />
-          <Route path="profile" element={<AdminPlaceholderPage title="Profile" />} />
+          <Route path="profile" element={<AdminProfilePage />} />
           <Route
             path="notifications"
             element={<AdminPlaceholderPage title="Notification" />}
