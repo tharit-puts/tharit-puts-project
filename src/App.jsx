@@ -15,6 +15,9 @@ import { AdminLayout } from '@/components/admin/AdminLayout'
 import { ArticleManagementPage } from '@/pages/admin/ArticleManagementPage'
 import { CreateArticlePage } from '@/pages/admin/CreateArticlePage'
 import { EditArticlePage } from '@/pages/admin/EditArticlePage'
+import { CategoryManagementPage } from '@/pages/admin/CategoryManagementPage'
+import { CreateCategoryPage } from '@/pages/admin/CreateCategoryPage'
+import { EditCategoryPage } from '@/pages/admin/EditCategoryPage'
 import { AdminPlaceholderPage } from '@/pages/admin/AdminPlaceholderPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { Toaster } from '@/components/ui/sonner'
@@ -67,10 +70,9 @@ function App() {
           <Route path="articles" element={<ArticleManagementPage />} />
           <Route path="articles/new" element={<CreateArticlePage />} />
           <Route path="articles/:id/edit" element={<EditArticlePage />} />
-          <Route
-            path="categories"
-            element={<AdminPlaceholderPage title="Category management" />}
-          />
+          <Route path="categories" element={<CategoryManagementPage />} />
+          <Route path="categories/new" element={<CreateCategoryPage />} />
+          <Route path="categories/:id/edit" element={<EditCategoryPage />} />
           <Route path="profile" element={<AdminPlaceholderPage title="Profile" />} />
           <Route
             path="notifications"
