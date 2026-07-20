@@ -2,9 +2,10 @@
 // เชื่อมกับ: NavBar (Profile menu), AuthContext, authApi
 import { useRef, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { CircleQuestionMark, Eye, EyeOff, RotateCcw, User } from 'lucide-react'
+import { CircleQuestionMark, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { NavBar } from '@/components/NavBar'
+import { AccountSidebar } from '@/components/AccountSidebar'
 import { Loading } from '@/components/Loading'
 import { Button } from '@/components/ui/button'
 import { usePageLoading } from '@/hooks/usePageLoading'
@@ -14,9 +15,6 @@ import defaultAvatar from '@/assets/defaultAvatar.png'
 
 const inputClassName =
   'w-full rounded-xl border border-[#DAD6D1] bg-white px-4 py-3 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B]'
-
-const sidebarItemClassName =
-  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#43403B]'
 
 const nameFieldHint =
   'This is your public display name. It will appear next to your comments on articles.'
@@ -84,34 +82,23 @@ export function ProfilePage() {
         </main>
       ) : (
         <main className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-16">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-12">
-            {/* เมนูด้านซ้าย + หัวข้อ */}
-            <aside>
-              <div className="mb-6 flex items-center gap-3">
-                <img
-                  src={savedAvatarSrc}
-                  alt={savedDisplayName}
-                  className="h-10 w-10 rounded-full object-cover"
-                />
-                <h1 className="text-xl text-foreground md:text-2xl">
-                  <span className="font-normal">{savedDisplayName}</span>{' '}
-                  <span className="font-normal text-[#75716B]">|</span>{' '}
-                  <span className="font-bold">Profile</span>
-                </h1>
-              </div>
+          <div className="mb-8 flex items-center gap-3">
+            <img
+              src={savedAvatarSrc}
+              alt={savedDisplayName}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+            <h1 className="text-xl text-foreground md:text-2xl">
+              <span className="font-normal">{savedDisplayName}</span>{' '}
+              <span className="font-normal text-[#75716B]">|</span>{' '}
+              <span className="font-bold">Profile</span>
+            </h1>
+          </div>
 
-              <nav className="flex flex-col gap-1">
-                <span
-                  className={`${sidebarItemClassName} font-semibold text-foreground`}
-                >
-                  <User className="h-4 w-4" />
-                  Profile
-                </span>
-                <span className={`${sidebarItemClassName} text-[#75716B]`}>
-                  <RotateCcw className="h-4 w-4" />
-                  Reset password
-                </span>
-              </nav>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-12">
+            {/* เมนูด้านซ้าย */}
+            <aside>
+              <AccountSidebar />
             </aside>
 
             {/* ฟอร์มแก้ไข profile */}

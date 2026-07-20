@@ -78,7 +78,7 @@ function GuestNav({ isMenuOpen, setIsMenuOpen }) {
 }
 
 // เมนูสำหรับ member (login แล้ว) — แสดง avatar, แจ้งเตือน, dropdown profile
-function MemberNav({ user, hasNotifications, onLogout, onProfileClick }) {
+function MemberNav({ user, hasNotifications, onLogout, onProfileClick, onResetPasswordClick }) {
   const displayName = user.name || user.username || 'Member'
   const avatarSrc = user.avatar || defaultAvatar
 
@@ -118,7 +118,7 @@ function MemberNav({ user, hasNotifications, onLogout, onProfileClick }) {
             Profile
           </DropdownMenuItem>
 
-          <DropdownMenuItem className={menuItemClassName}>
+          <DropdownMenuItem className={menuItemClassName} onClick={onResetPasswordClick}>
             <RotateCcw className="h-4 w-4" />
             Reset password
           </DropdownMenuItem>
@@ -153,6 +153,10 @@ export function NavBar() {
     navigate('/profile')
   }
 
+  function handleResetPasswordClick() {
+    navigate('/reset-password')
+  }
+
   return (
     <header className="border-b-2 border-border bg-background">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:px-10">
@@ -166,6 +170,7 @@ export function NavBar() {
             hasNotifications={hasNotifications}
             onLogout={handleLogout}
             onProfileClick={handleProfileClick}
+            onResetPasswordClick={handleResetPasswordClick}
           />
         ) : (
           <GuestNav isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />

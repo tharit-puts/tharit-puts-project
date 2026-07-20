@@ -10,6 +10,12 @@ export const EMAIL_TAKEN_MESSAGE =
 export const INVALID_CREDENTIALS_MESSAGE =
   'Incorrect email or password. Please try again.'
 
+export const WRONG_PASSWORD_MESSAGE = 'Current password is incorrect.'
+
+export const PASSWORD_MISMATCH_MESSAGE = 'New passwords do not match.'
+
+export const PASSWORD_TOO_SHORT_MESSAGE = 'Password must be at least 6 characters.'
+
 // key ใน localStorage สำหรับเก็บ user ที่สมัคร, session ปัจจุบัน, และสถานะแจ้งเตือน
 const STORAGE_KEY = 'hh_registered_users'
 const SESSION_KEY = 'hh_current_user'
@@ -91,6 +97,60 @@ export function updateUserProfile({ name, username, avatar }) {
   }
 
   return sanitizeUser(updatedUser)
+}
+
+// ตรวจรหัสผ่านปัจจุบัน — ResetPasswordPage เรียกก่อนเปิด modal
+export function verifyCurrentPassword(currentPassword) {
+  const currentUser = getCurrentUser()
+  if (!currentUser?.email) return false
+
+  const normalizedEmail = currentUser.email.trim().toLowerCase()
+  const users = getStoredUsers()
+  const storedUser = users.find((entry) => entry.email === normalizedEmail)
+
+  if (!storedUser) return false
+
+  return storedUser.password === currentPassword
+}
+
+// เปลี่ยนรหัสผ่าน — ResetPasswordPage เรียกใช้
+export async function resetUserPassword({ currentPassword, newPassword }) {
+  const currentUser = getCurrentUser()
+  if (!currentUser?.email) {
+    throw new Error('Not logged in')
+  }
+
+  const normalizedEmail = currentUser.email.trim().toLowerCase()
+  const users = getStoredUsers()
+  const index = users.findIndex((entry) => entry.email === normalizedEmail)
+
+  if (index === -1) {
+    try {
+      await axios.post(`${API_BASE_URL}/auth/reset-password`, {
+        email: currentUser.email,
+        currentPassword,
+        newPassword,
+      })
+      return
+    } catch (error) {
+      if (error.response?.status === 404) {
+        const wrongError = new Error(WRONG_PASSWORD_MESSAGE)
+        wrongError.code = 'WRONG_PASSWORD'
+        throw wrongError
+      }
+
+      throw error
+    }
+  }
+
+  if (users[index].password !== currentPassword) {
+    const wrongError = new Error(WRONG_PASSWORD_MESSAGE)
+    wrongError.code = 'WRONG_PASSWORD'
+    throw wrongError
+  }
+
+  users[index].password = newPassword
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(users))
 }
 
 function getStoredUsers() {
