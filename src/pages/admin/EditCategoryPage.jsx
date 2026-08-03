@@ -23,16 +23,31 @@ export function EditCategoryPage() {
   const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
-    const category = getCategoryById(id)
-    if (!category) {
-      toast.error('Category not found')
-      navigate('/admin/categories')
-      return
+    let isActive = true
+
+    getCategoryById(id)
+      .then((category) => {
+        if (!isActive) return
+        if (!category) {
+          toast.error('Category not found')
+          navigate('/admin/categories')
+          return
+        }
+        setName(category.name)
+      })
+      .catch((error) => {
+        console.error('Failed to load category:', error)
+        if (!isActive) return
+        toast.error('Failed to load category')
+        navigate('/admin/categories')
+      })
+
+    return () => {
+      isActive = false
     }
-    setName(category.name)
   }, [id, navigate])
 
-  function handleSave() {
+  async function handleSave() {
     if (!name.trim()) {
       toast.error('Please enter a category name')
       return
@@ -41,7 +56,7 @@ export function EditCategoryPage() {
     setIsSubmitting(true)
 
     try {
-      updateCategory(id, name)
+      await updateCategory(id, name)
       toast.success('Category saved')
       navigate('/admin/categories')
     } catch (error) {
@@ -52,16 +67,16 @@ export function EditCategoryPage() {
     }
   }
 
-  function handleDeleteConfirm() {
+  async function handleDeleteConfirm() {
     setIsDeleting(true)
 
     try {
-      deleteCategory(id)
+      await deleteCategory(id)
       toast.success('Category deleted')
       navigate('/admin/categories')
     } catch (error) {
       console.error('Failed to delete category:', error)
-      toast.error('Failed to delete category')
+      toast.error('Failed to delete category', { description: error.message })
     } finally {
       setIsDeleting(false)
       setIsDeleteModalOpen(false)

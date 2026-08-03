@@ -1,35 +1,5 @@
-// สถานะบทความใน admin — API ไม่มี status จึง default เป็น published
-const STATUS_STORAGE_KEY = 'hh_admin_post_status'
-
-export function getPostStatus(postId) {
-  try {
-    const map = JSON.parse(localStorage.getItem(STATUS_STORAGE_KEY) ?? '{}')
-    return map[postId] ?? 'published'
-  } catch {
-    return 'published'
-  }
-}
-
+// สถานะบทความ — ตอนนี้เก็บอยู่ในคอลัมน์ status ของตาราง posts บน backend แล้ว
+// จึงไม่ต้องมีสำเนาใน localStorage อีก เหลือแค่ตัวช่วยแปลงเป็นข้อความสำหรับแสดงผล
 export function getStatusLabel(status) {
   return status === 'draft' ? 'Draft' : 'Published'
-}
-
-export function setPostStatus(postId, status) {
-  try {
-    const map = JSON.parse(localStorage.getItem(STATUS_STORAGE_KEY) ?? '{}')
-    map[postId] = status
-    localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(map))
-  } catch (error) {
-    console.error('Failed to save post status:', error)
-  }
-}
-
-export function removePostStatus(postId) {
-  try {
-    const map = JSON.parse(localStorage.getItem(STATUS_STORAGE_KEY) ?? '{}')
-    delete map[postId]
-    localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(map))
-  } catch (error) {
-    console.error('Failed to remove post status:', error)
-  }
 }

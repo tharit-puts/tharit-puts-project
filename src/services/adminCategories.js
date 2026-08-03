@@ -1,86 +1,81 @@
-// จัดการหมวดหมู่ใน admin — เก็บใน localStorage เพราะ API ภายนอกไม่รองรับการเขียนหมวดหมู่
-const CATEGORIES_STORAGE_KEY = 'hh_admin_categories'
-const DEFAULT_CATEGORIES = ['Cat', 'General', 'Inspiration']
+// จัดการหมวดหมู่ — คุยกับ backend ที่ /categories
+// ทุกฟังก์ชันเป็น async แล้ว (เมื่อก่อนอ่านจาก localStorage จึงทำแบบ sync ได้)
+import { apiClient, getApiErrorMessage } from '@/lib/apiClient'
 
-function readCategories() {
+// ดึงหมวดหมู่ทั้งหมด — คืน [{ id, name }]
+export async function getCategories() {
+  const { data } = await apiClient.get('/categories')
+  return data
+}
+
+// ดึงหมวดหมู่เดียว — คืน null ถ้าไม่มี เพื่อให้หน้า Edit จัดการต่อได้ง่าย
+export async function getCategoryById(id) {
   try {
-    const stored = localStorage.getItem(CATEGORIES_STORAGE_KEY)
-    if (!stored) return null
-    const parsed = JSON.parse(stored)
-    return Array.isArray(parsed) ? parsed : null
-  } catch {
-    return null
+    const { data } = await apiClient.get(`/categories/${id}`)
+    return data
+  } catch (error) {
+    if (error.response?.status === 404) return null
+    throw error
   }
 }
 
-function writeCategories(categories) {
-  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories))
+// ดึงเฉพาะชื่อหมวดหมู่ — dropdown ในฟอร์มบทความใช้ (ส่งชื่อไปให้ backend ไม่ใช่ id)
+export async function getCategoryNames() {
+  const categories = await getCategories()
+  return categories.map((category) => category.name)
 }
 
-function makeCategory(name) {
-  return {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    name: name.trim(),
-  }
-}
-
-// ดึงหมวดหมู่ทั้งหมด — สร้างค่าเริ่มต้นถ้ายังไม่มีใน storage
-export function getCategories() {
-  const stored = readCategories()
-  if (stored) return stored
-
-  const seeded = DEFAULT_CATEGORIES.map((name) => makeCategory(name))
-  writeCategories(seeded)
-  return seeded
-}
-
-export function getCategoryById(id) {
-  return getCategories().find((category) => category.id === id) ?? null
-}
-
-function isDuplicateName(name, excludeId) {
-  const normalized = name.trim().toLowerCase()
-  return getCategories().some(
-    (category) =>
-      category.id !== excludeId && category.name.toLowerCase() === normalized,
-  )
-}
-
-// สร้างหมวดหมู่ใหม่
-export function createCategory(name) {
+// สร้างหมวดหมู่ใหม่ (ต้องเป็น admin)
+export async function createCategory(name) {
   const trimmed = name.trim()
   if (!trimmed) {
     throw new Error('Category name is required')
   }
-  if (isDuplicateName(trimmed)) {
-    throw new Error('This category already exists')
-  }
 
-  const categories = getCategories()
-  const newCategory = makeCategory(trimmed)
-  writeCategories([...categories, newCategory])
-  return newCategory
+  try {
+    const { data } = await apiClient.post('/categories', { name: trimmed })
+    return data
+  } catch (error) {
+    // backend ตอบ 409 เมื่อชื่อซ้ำ (ตาราง categories ตั้ง UNIQUE ไว้)
+    if (error.response?.status === 409) {
+      throw new Error('This category already exists')
+    }
+    throw new Error(getApiErrorMessage(error, 'Failed to create category'))
+  }
 }
 
-// แก้ไขชื่อหมวดหมู่
-export function updateCategory(id, name) {
+// แก้ไขชื่อหมวดหมู่ (ต้องเป็น admin)
+export async function updateCategory(id, name) {
   const trimmed = name.trim()
   if (!trimmed) {
     throw new Error('Category name is required')
   }
-  if (isDuplicateName(trimmed, id)) {
-    throw new Error('This category already exists')
-  }
 
-  const categories = getCategories().map((category) =>
-    category.id === id ? { ...category, name: trimmed } : category,
-  )
-  writeCategories(categories)
-  return categories.find((category) => category.id === id) ?? null
+  try {
+    const { data } = await apiClient.put(`/categories/${id}`, { name: trimmed })
+    return data
+  } catch (error) {
+    if (error.response?.status === 409) {
+      throw new Error('This category already exists')
+    }
+    if (error.response?.status === 404) {
+      throw new Error('Category not found')
+    }
+    throw new Error(getApiErrorMessage(error, 'Failed to save category'))
+  }
 }
 
-// ลบหมวดหมู่
-export function deleteCategory(id) {
-  const categories = getCategories().filter((category) => category.id !== id)
-  writeCategories(categories)
+// ลบหมวดหมู่ (ต้องเป็น admin)
+export async function deleteCategory(id) {
+  try {
+    await apiClient.delete(`/categories/${id}`)
+  } catch (error) {
+    // 409 = ยังมีบทความใช้หมวดหมู่นี้อยู่ foreign key จึงไม่ให้ลบ
+    if (error.response?.status === 409) {
+      throw new Error(
+        'This category still has articles. Move or delete them first.',
+      )
+    }
+    throw new Error(getApiErrorMessage(error, 'Failed to delete category'))
+  }
 }

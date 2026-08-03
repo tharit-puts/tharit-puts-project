@@ -1,24 +1,37 @@
 // หน้า Create article — ฟอร์มสร้างบทความใหม่ใน admin panel
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ArticleFormFields, INTRO_MAX_LENGTH } from '@/components/admin/ArticleFormFields'
 import { createPost } from '@/services/postsApi'
-import { setPostStatus } from '@/services/adminPosts'
-import { getAuthorName } from '@/services/adminProfile'
+import { getCategoryNames } from '@/services/adminCategories'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function CreateArticlePage() {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
-  const authorName = getAuthorName()
+  const { user } = useAuth()
+  // ชื่อผู้เขียนมาจากบัญชี admin ที่ login อยู่
+  const authorName = user?.name ?? ''
 
+  const [categoryOptions, setCategoryOptions] = useState([])
   const [thumbnail, setThumbnail] = useState('')
   const [category, setCategory] = useState('')
   const [title, setTitle] = useState('')
   const [introduction, setIntroduction] = useState('')
   const [content, setContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // โหลดรายชื่อหมวดหมู่จาก backend มาใส่ dropdown
+  useEffect(() => {
+    getCategoryNames()
+      .then(setCategoryOptions)
+      .catch((error) => {
+        console.error('Failed to load categories:', error)
+        toast.error('Failed to load categories')
+      })
+  }, [])
 
   function handleUploadClick() {
     fileInputRef.current?.click()
@@ -61,16 +74,15 @@ export function CreateArticlePage() {
     setIsSubmitting(true)
 
     try {
-      const post = await createPost({
+      await createPost({
         title: title.trim(),
         description: introduction.trim(),
         content: content.trim(),
         category,
         author: authorName,
         image: thumbnail || undefined,
+        status,
       })
-
-      setPostStatus(post.id, status)
 
       toast.success(status === 'draft' ? 'Saved as draft' : 'Article published', {
         description:
@@ -81,8 +93,9 @@ export function CreateArticlePage() {
       navigate('/admin/articles')
     } catch (error) {
       console.error('Failed to create article:', error)
+      // แสดงข้อความจริงจาก backend เช่น เตือนว่า content ไม่มีหัวข้อ "## 1. "
       toast.error('Failed to save article', {
-        description: 'Please try again later.',
+        description: error.message || 'Please try again later.',
       })
     } finally {
       setIsSubmitting(false)
@@ -123,6 +136,7 @@ export function CreateArticlePage() {
             onFileChange={handleFileChange}
             category={category}
             onCategoryChange={(event) => setCategory(event.target.value)}
+            categoryOptions={categoryOptions}
             author={authorName}
             title={title}
             onTitleChange={(event) => setTitle(event.target.value)}

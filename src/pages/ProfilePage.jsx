@@ -61,12 +61,14 @@ export function ProfilePage() {
     setIsSaving(true)
 
     try {
-      updateProfile({ name, username, avatar })
+      await updateProfile({ name, username, avatar })
       toast.success('Saved profile', {
         description: 'Your profile has been successfully updated',
       })
     } catch (error) {
       console.error('Failed to update profile:', error)
+      // เช่น username ถูกใช้ไปแล้ว (backend ตอบ 409)
+      toast.error('Failed to save profile', { description: error.message })
     } finally {
       setIsSaving(false)
     }

@@ -13,7 +13,7 @@ export function CreateCategoryPage() {
   const [name, setName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function handleSave() {
+  async function handleSave() {
     if (!name.trim()) {
       toast.error('Please enter a category name')
       return
@@ -22,7 +22,7 @@ export function CreateCategoryPage() {
     setIsSubmitting(true)
 
     try {
-      createCategory(name)
+      await createCategory(name)
       toast.success('Category created')
       navigate('/admin/categories')
     } catch (error) {

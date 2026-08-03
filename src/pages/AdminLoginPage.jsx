@@ -5,9 +5,12 @@ import { NavBar } from '@/components/NavBar'
 import { toast } from 'sonner'
 import { AuthInput } from '@/components/AuthForm'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/contexts/AuthContext'
 import {
   ADMIN_INVALID_CREDENTIALS_DESCRIPTION,
   ADMIN_INVALID_CREDENTIALS_TITLE,
+  NOT_ADMIN_DESCRIPTION,
+  NOT_ADMIN_TITLE,
   loginAdmin,
 } from '@/services/adminApi'
 
@@ -21,6 +24,7 @@ const adminErrorToastClassNames = {
 
 export function AdminLoginPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [emailOrUsername, setEmailOrUsername] = useState('')
   const [password, setPassword] = useState('')
   const [hasLoginError, setHasLoginError] = useState(false)
@@ -30,19 +34,31 @@ export function AdminLoginPage() {
     setHasLoginError(false)
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     setIsSubmitting(true)
 
     try {
-      loginAdmin({ emailOrUsername, password })
+      // ตรวจรหัสผ่านกับ database จริง และต้องมี role = admin เท่านั้น
+      const session = await loginAdmin({ emailOrUsername, password })
+      login(session)
       navigate('/admin/articles')
     } catch (error) {
+      setHasLoginError(true)
+
+      // แยกสองกรณี: รหัสผ่านผิด กับ รหัสผ่านถูกแต่บัญชีไม่ใช่ admin
+      if (error.code === 'NOT_ADMIN') {
+        toast.error(NOT_ADMIN_TITLE, {
+          description: NOT_ADMIN_DESCRIPTION,
+          classNames: adminErrorToastClassNames,
+        })
+        return
+      }
+
       if (
         error.code === 'ADMIN_INVALID_CREDENTIALS' ||
         error.message === ADMIN_INVALID_CREDENTIALS_TITLE
       ) {
-        setHasLoginError(true)
         toast.error(ADMIN_INVALID_CREDENTIALS_TITLE, {
           description: ADMIN_INVALID_CREDENTIALS_DESCRIPTION,
           classNames: adminErrorToastClassNames,
@@ -51,6 +67,10 @@ export function AdminLoginPage() {
       }
 
       console.error('Failed to log in as admin:', error)
+      toast.error('Could not log in', {
+        description: error.message,
+        classNames: adminErrorToastClassNames,
+      })
     } finally {
       setIsSubmitting(false)
     }

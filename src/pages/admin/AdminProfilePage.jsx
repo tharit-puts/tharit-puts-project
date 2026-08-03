@@ -2,7 +2,7 @@
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { getProfile, updateProfile } from '@/services/adminProfile'
+import { useAuth } from '@/contexts/AuthContext'
 import defaultAvatar from '@/assets/defaultAvatar.png'
 
 const inputClassName =
@@ -20,13 +20,13 @@ const successToastClassNames = {
 
 export function AdminProfilePage() {
   const fileInputRef = useRef(null)
-  const [profile] = useState(() => getProfile())
+  // โปรไฟล์ admin คือบัญชีผู้ใช้ที่ login อยู่ ไม่ใช่ข้อมูลแยกใน localStorage อีกแล้ว
+  const { user, updateProfile } = useAuth()
 
-  const [name, setName] = useState(profile.name)
-  const [username, setUsername] = useState(profile.username)
-  const [email, setEmail] = useState(profile.email)
-  const [bio, setBio] = useState(profile.bio)
-  const [avatar, setAvatar] = useState(profile.avatar)
+  const [name, setName] = useState(user?.name ?? '')
+  const [username, setUsername] = useState(user?.username ?? '')
+  const [bio, setBio] = useState(user?.bio ?? '')
+  const [avatar, setAvatar] = useState(user?.avatar ?? '')
   const [isSaving, setIsSaving] = useState(false)
 
   const avatarSrc = avatar || defaultAvatar
@@ -48,17 +48,19 @@ export function AdminProfilePage() {
     reader.readAsDataURL(file)
   }
 
-  function handleSave() {
+  async function handleSave() {
     setIsSaving(true)
 
     try {
-      updateProfile({ name, username, email, bio, avatar })
+      // ไม่ส่ง email ไปด้วย เพราะ backend ไม่ให้เปลี่ยนอีเมล (เป็นตัวระบุตัวตนตอน login)
+      await updateProfile({ name, username, bio, avatar })
       toast.success('Saved profile', {
         description: 'Your profile has been successfully updated',
         classNames: successToastClassNames,
       })
     } catch (error) {
       console.error('Failed to update admin profile:', error)
+      toast.error('Failed to save profile', { description: error.message })
     } finally {
       setIsSaving(false)
     }
@@ -138,10 +140,13 @@ export function AdminProfilePage() {
             <input
               id="email"
               type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className={`mt-2 ${inputClassName}`}
+              value={user?.email ?? ''}
+              readOnly
+              className={`mt-2 ${inputClassName} bg-[#F9F8F6] text-[#75716B]`}
             />
+            <p className="mt-1 text-xs text-[#75716B]">
+              Email is used to log in and cannot be changed here.
+            </p>
           </div>
 
           <div>

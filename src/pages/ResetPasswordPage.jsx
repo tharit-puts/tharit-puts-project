@@ -16,7 +16,6 @@ import {
   PASSWORD_TOO_SHORT_MESSAGE,
   WRONG_PASSWORD_MESSAGE,
   resetUserPassword,
-  verifyCurrentPassword,
 } from '@/services/authApi'
 import defaultAvatar from '@/assets/defaultAvatar.png'
 
@@ -106,17 +105,19 @@ export function ResetPasswordPage() {
       confirmPassword: '',
     }
 
+    // ตรวจได้แค่ว่ากรอกมาหรือยัง ความถูกต้องของรหัสผ่านเดิมให้ backend ตรวจ (ตอบ 401 ถ้าผิด)
+    // เพราะเบราว์เซอร์ไม่มีรหัสผ่านจริงเก็บไว้แล้ว — มีแต่ bcrypt hash ที่อยู่ใน database
     if (!currentPassword) {
       nextErrors.currentPassword = 'Please enter your current password.'
-    } else if (!verifyCurrentPassword(currentPassword)) {
-      nextErrors.currentPassword =
-        'The current password you entered is incorrect. Please try again.'
     }
 
     if (!newPassword) {
       nextErrors.newPassword = 'New password is required.'
     } else if (newPassword.length < 6) {
       nextErrors.newPassword = PASSWORD_TOO_SHORT_MESSAGE
+    } else if (newPassword === currentPassword) {
+      nextErrors.newPassword =
+        'New password must be different from the current password.'
     }
 
     nextErrors.confirmPassword = validateConfirmPassword()
@@ -157,6 +158,8 @@ export function ResetPasswordPage() {
       }
 
       console.error('Failed to reset password:', error)
+      setIsModalOpen(false)
+      toast.error('Failed to reset password', { description: error.message })
     } finally {
       setIsSubmitting(false)
     }

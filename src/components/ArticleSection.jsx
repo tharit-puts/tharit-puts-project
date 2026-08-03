@@ -6,20 +6,32 @@ import { ArticleSearch } from '@/components/ArticleSearch'
 import { BlogCat } from '@/components/BlogCat'
 import { Loading } from '@/components/Loading'
 import { fetchPosts, POSTS_PER_PAGE } from '@/services/postsApi'
+import { getCategoryNames } from '@/services/adminCategories'
 
-// รายชื่อหมวดหมู่ที่ให้ผู้ใช้เลือกกรอง
-const categories = ['Highlight', 'Cat', 'Inspiration', 'General']
+// 'Highlight' ไม่ใช่หมวดหมู่จริงในฐานข้อมูล เป็นแท็บ "ดูทั้งหมด"
+const ALL_CATEGORIES_TAB = 'Highlight'
 
 const SEARCH_DEBOUNCE_MS = 500
 
 export function ArticleSection() {
+  // โหลดหมวดหมู่จาก backend เพื่อให้หมวดที่ admin เพิ่มใหม่โผล่มาที่หน้าแรกด้วย
+  const [categories, setCategories] = useState([ALL_CATEGORIES_TAB])
   const [posts, setPosts] = useState([])
   const [page, setPage] = useState(1)
-  const [category, setCategory] = useState('Highlight')
+  const [category, setCategory] = useState(ALL_CATEGORIES_TAB)
   const [searchQuery, setSearchQuery] = useState('')
   const [keyword, setKeyword] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
+
+  useEffect(() => {
+    getCategoryNames()
+      .then((names) => setCategories([ALL_CATEGORIES_TAB, ...names]))
+      .catch((error) => {
+        // ถ้าโหลดไม่ได้ก็ยังเหลือแท็บ Highlight ให้ดูบทความทั้งหมดได้
+        console.error('Failed to load categories:', error)
+      })
+  }, [])
 
   // debounce การค้นหา 500ms — ลดจำนวน request ไป API
   useEffect(() => {

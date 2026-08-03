@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 export const inputClassName =
   'w-full rounded-xl border border-[#DAD6D1] bg-white px-4 py-3 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B]'
 
-export const categoryOptions = ['Cat', 'Inspiration', 'General']
 export const INTRO_MAX_LENGTH = 120
 
 export function ArticleFormFields({
@@ -15,6 +14,8 @@ export function ArticleFormFields({
   onFileChange,
   category,
   onCategoryChange,
+  // ชื่อหมวดหมู่โหลดมาจาก backend แล้ว ไม่ hardcode ในไฟล์นี้อีก
+  categoryOptions = [],
   author,
   title,
   onTitleChange,
@@ -134,10 +135,17 @@ export function ArticleFormFields({
           id="content"
           value={content}
           onChange={onContentChange}
-          placeholder="Content"
+          placeholder={'## 1. Section title\n\nParagraph text...\n\n## 2. Next section\n\nParagraph text...'}
           rows={12}
           className={`mt-2 ${inputClassName} resize-y`}
         />
+        <p className="mt-2 text-xs text-[#75716B]">
+          Start each section with{' '}
+          <code className="rounded bg-white px-1 py-0.5 font-mono">## 1. </code>,{' '}
+          <code className="rounded bg-white px-1 py-0.5 font-mono">## 2. </code> and
+          separate paragraphs with a blank line. Published articles must contain at
+          least one section heading in this format.
+        </p>
       </div>
     </div>
   )

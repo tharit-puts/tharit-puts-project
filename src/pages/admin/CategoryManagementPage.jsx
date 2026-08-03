@@ -1,19 +1,37 @@
 // หน้า Category management — แสดง/ค้นหา/สร้าง/แก้ไข/ลบหมวดหมู่
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Loading } from '@/components/Loading'
 import { DeleteCategoryModal } from '@/components/admin/DeleteCategoryModal'
 import { deleteCategory, getCategories } from '@/services/adminCategories'
 import searchIcon from '@/assets/Search_light.png'
 
 export function CategoryManagementPage() {
   const navigate = useNavigate()
-  const [categories, setCategories] = useState(() => getCategories())
+  const [categories, setCategories] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // โหลดหมวดหมู่จาก backend — เรียกซ้ำได้หลังลบเพื่อดึงรายการล่าสุด
+  const loadCategories = useCallback(async () => {
+    try {
+      setCategories(await getCategories())
+    } catch (error) {
+      console.error('Failed to load categories:', error)
+      toast.error('Failed to load categories')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadCategories()
+  }, [loadCategories])
 
   const filteredCategories = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase()
@@ -23,19 +41,20 @@ export function CategoryManagementPage() {
     )
   }, [categories, searchQuery])
 
-  function handleDeleteConfirm() {
+  async function handleDeleteConfirm() {
     if (!deleteTarget) return
 
     setIsDeleting(true)
 
     try {
-      deleteCategory(deleteTarget.id)
-      setCategories(getCategories())
+      await deleteCategory(deleteTarget.id)
+      await loadCategories()
       toast.success('Category deleted')
       setDeleteTarget(null)
     } catch (error) {
       console.error('Failed to delete category:', error)
-      toast.error('Failed to delete category')
+      // เช่น "This category still has articles" ที่ backend ส่งมาเมื่อ foreign key กันไว้
+      toast.error('Failed to delete category', { description: error.message })
     } finally {
       setIsDeleting(false)
     }
@@ -78,7 +97,11 @@ export function CategoryManagementPage() {
             Category
           </div>
 
-          {filteredCategories.length > 0 ? (
+          {isLoading ? (
+            <div className="px-6 py-16">
+              <Loading />
+            </div>
+          ) : filteredCategories.length > 0 ? (
             filteredCategories.map((category, index) => (
               <div
                 key={category.id}

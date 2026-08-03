@@ -1,10 +1,11 @@
-// หน้า Reset password (admin) — เปลี่ยนรหัสผ่าน admin (เก็บใน localStorage)
+// หน้า Reset password (admin) — เปลี่ยนรหัสผ่านของบัญชี admin ที่ login อยู่
+// ใช้ endpoint เดียวกับฝั่งผู้ใช้ทั่วไป (PUT /auth/reset-password)
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ResetPasswordModal } from '@/components/ResetPasswordModal'
-import { getAdminPassword, updateAdminPassword } from '@/services/adminApi'
+import { WRONG_PASSWORD_MESSAGE, resetUserPassword } from '@/services/authApi'
 
 const inputClassName =
   'w-full rounded-xl border border-[#DAD6D1] bg-white py-3 pr-11 pl-4 text-sm text-foreground placeholder:text-[#75716B] outline-none focus:border-[#75716B]'
@@ -55,11 +56,6 @@ export function AdminResetPasswordPage() {
       return false
     }
 
-    if (currentPassword !== getAdminPassword()) {
-      toast.error('The current password you entered is incorrect')
-      return false
-    }
-
     if (!newPassword) {
       toast.error('Please enter a new password')
       return false
@@ -67,6 +63,11 @@ export function AdminResetPasswordPage() {
 
     if (newPassword.length < 6) {
       toast.error('New password must be at least 6 characters')
+      return false
+    }
+
+    if (newPassword === currentPassword) {
+      toast.error('New password must be different from the current password')
       return false
     }
 
@@ -83,11 +84,12 @@ export function AdminResetPasswordPage() {
     setIsModalOpen(true)
   }
 
-  function handleConfirmReset() {
+  async function handleConfirmReset() {
     setIsSubmitting(true)
 
     try {
-      updateAdminPassword(newPassword)
+      // backend เป็นคนตรวจรหัสผ่านเดิม (ตอบ 401 ถ้าผิด)
+      await resetUserPassword({ currentPassword, newPassword })
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
@@ -96,7 +98,11 @@ export function AdminResetPasswordPage() {
       })
     } catch (error) {
       console.error('Failed to reset admin password:', error)
-      toast.error('Failed to reset password')
+      if (error.code === 'WRONG_PASSWORD') {
+        toast.error(WRONG_PASSWORD_MESSAGE)
+      } else {
+        toast.error('Failed to reset password', { description: error.message })
+      }
     } finally {
       setIsSubmitting(false)
       setIsModalOpen(false)

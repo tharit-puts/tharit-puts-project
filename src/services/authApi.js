@@ -1,7 +1,13 @@
-// บริการ Auth — สมัคร/เข้าสู่ระบบผ่าน API หรือ localStorage (fallback)
-// เชื่อมกับ: AuthContext, LoginPage, SignUpPage
-import axios from 'axios'
-import { API_BASE_URL } from '@/services/postsApi' // ใช้ URL เดียวกับ posts API
+// บริการ Auth — สมัคร/เข้าสู่ระบบผ่าน backend ของเราเอง (bcrypt + JWT)
+// เชื่อมกับ: AuthContext, LoginPage, SignUpPage, ProfilePage, ResetPasswordPage
+import {
+  apiClient,
+  clearToken,
+  getApiErrorMessage,
+  getApiErrorStatus,
+  getToken,
+  setToken,
+} from '@/lib/apiClient'
 
 // ข้อความ error ที่หน้า Login/SignUp แสดงให้ user เห็น
 export const EMAIL_TAKEN_MESSAGE =
@@ -16,20 +22,11 @@ export const PASSWORD_MISMATCH_MESSAGE = 'New passwords do not match.'
 
 export const PASSWORD_TOO_SHORT_MESSAGE = 'Password must be at least 6 characters.'
 
-// key ใน localStorage สำหรับเก็บ user ที่สมัคร, session ปัจจุบัน, และสถานะแจ้งเตือน
-const STORAGE_KEY = 'hh_registered_users'
+// เก็บ user ที่ login อยู่ไว้ใน localStorage ด้วย เพื่อให้หน้าเว็บวาดได้ทันทีตอนรีเฟรช
+// ไม่ต้องรอ /auth/me ตอบก่อน (แต่ยังยิง /auth/me เพื่อยืนยันและอัปเดตข้อมูลล่าสุด)
 const SESSION_KEY = 'hh_current_user'
 const NOTIFICATIONS_KEY = 'hh_has_notifications'
 
-// ตัด password ออกก่อนส่ง user กลับ — ไม่เก็บรหัสผ่านใน session
-function sanitizeUser(user) {
-  if (!user) return null
-
-  const { password, ...safeUser } = user
-  return safeUser
-}
-
-// อ่าน user ที่ login อยู่ — AuthContext เรียกตอน mount และหลัง login
 export function getCurrentUser() {
   try {
     const data = localStorage.getItem(SESSION_KEY)
@@ -39,7 +36,6 @@ export function getCurrentUser() {
   }
 }
 
-// ตรวจว่ามีจุดแดงแจ้งเตือนที่ NavBar หรือไม่
 export function getHasNotifications() {
   return localStorage.getItem(NOTIFICATIONS_KEY) === 'true'
 }
@@ -49,16 +45,27 @@ export function clearNotifications() {
   localStorage.setItem(NOTIFICATIONS_KEY, 'false')
 }
 
-// บันทึก session หลัง login/signup — AuthContext.login เรียกใช้
-export function saveSession(user) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(sanitizeUser(user)))
+// บันทึก session หลัง login/signup — เก็บทั้ง token และข้อมูล user
+export function saveSession({ token, user }) {
+  if (token) setToken(token)
+  if (user) localStorage.setItem(SESSION_KEY, JSON.stringify(user))
   localStorage.setItem(NOTIFICATIONS_KEY, 'true')
 }
 
-// ลบ session ตอน logout — AuthContext.logout เรียกใช้
+// อัปเดตแค่ข้อมูล user ใน session (ไม่แตะ token) — ใช้หลังแก้โปรไฟล์
+export function saveUserToSession(user) {
+  if (user) localStorage.setItem(SESSION_KEY, JSON.stringify(user))
+}
+
+// ลบ session ตอน logout — ต้องลบ token ด้วย ไม่งั้นยังเรียก API ในนามคนเดิมได้
 export function clearSession() {
+  clearToken()
   localStorage.removeItem(SESSION_KEY)
   localStorage.removeItem(NOTIFICATIONS_KEY)
+}
+
+export function hasToken() {
+  return Boolean(getToken())
 }
 
 // แสดงอีเมล 4 ตัวแรก ที่เหลือเป็น * — ใช้ในหน้า Profile (อีเมลแก้ไม่ได้)
@@ -71,202 +78,92 @@ export function maskEmail(email) {
   return `${visible}****@${domain}`
 }
 
-// อัปเดต name, username, avatar — ProfilePage เรียกใช้
-export function updateUserProfile({ name, username, avatar }) {
-  const currentUser = getCurrentUser()
-  if (!currentUser) {
-    throw new Error('Not logged in')
-  }
+// --- API calls ---------------------------------------------------------------
 
-  const updatedUser = {
-    ...currentUser,
-    name: name.trim(),
-    username: username.trim(),
-    ...(avatar !== undefined ? { avatar } : {}),
-  }
-
-  saveSession(updatedUser)
-
-  const normalizedEmail = currentUser.email?.trim().toLowerCase()
-  const users = getStoredUsers()
-  const index = users.findIndex((entry) => entry.email === normalizedEmail)
-
-  if (index !== -1) {
-    users[index] = {
-      ...users[index],
-      name: updatedUser.name,
-      username: updatedUser.username,
-      avatar: updatedUser.avatar,
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(users))
-  }
-
-  return sanitizeUser(updatedUser)
-}
-
-// ตรวจรหัสผ่านปัจจุบัน — ResetPasswordPage เรียกก่อนเปิด modal
-export function verifyCurrentPassword(currentPassword) {
-  const currentUser = getCurrentUser()
-  if (!currentUser?.email) return false
-
-  const normalizedEmail = currentUser.email.trim().toLowerCase()
-  const users = getStoredUsers()
-  const storedUser = users.find((entry) => entry.email === normalizedEmail)
-
-  if (!storedUser) return false
-
-  return storedUser.password === currentPassword
-}
-
-// เปลี่ยนรหัสผ่าน — ResetPasswordPage เรียกใช้
-export async function resetUserPassword({ currentPassword, newPassword }) {
-  const currentUser = getCurrentUser()
-  if (!currentUser?.email) {
-    throw new Error('Not logged in')
-  }
-
-  const normalizedEmail = currentUser.email.trim().toLowerCase()
-  const users = getStoredUsers()
-  const index = users.findIndex((entry) => entry.email === normalizedEmail)
-
-  if (index === -1) {
-    try {
-      await axios.post(`${API_BASE_URL}/auth/reset-password`, {
-        email: currentUser.email,
-        currentPassword,
-        newPassword,
-      })
-      return
-    } catch (error) {
-      if (error.response?.status === 404) {
-        const wrongError = new Error(WRONG_PASSWORD_MESSAGE)
-        wrongError.code = 'WRONG_PASSWORD'
-        throw wrongError
-      }
-
-      throw error
-    }
-  }
-
-  if (users[index].password !== currentPassword) {
-    const wrongError = new Error(WRONG_PASSWORD_MESSAGE)
-    wrongError.code = 'WRONG_PASSWORD'
-    throw wrongError
-  }
-
-  users[index].password = newPassword
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users))
-}
-
-function getStoredUsers() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
-  } catch {
-    return []
-  }
-}
-
-// fallback เมื่อ API ไม่มี endpoint register (404) — เก็บ user ใน localStorage แทน
-function registerLocally({ name, username, email, password }) {
-  const normalizedEmail = email.trim().toLowerCase()
-  const users = getStoredUsers()
-
-  if (users.some((entry) => entry.email === normalizedEmail)) {
-    const error = new Error(EMAIL_TAKEN_MESSAGE)
-    error.code = 'EMAIL_TAKEN'
-    throw error
-  }
-
-  users.push({ name, username, email: normalizedEmail, password })
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users))
-
-  return sanitizeUser({ name, username, email: normalizedEmail })
-}
-
-function isEmailTakenError(error) {
-  const status = error.response?.status
-  const data = error.response?.data
-  const message =
-    typeof data === 'string'
-      ? data
-      : data?.error ?? data?.message ?? data?.detail ?? ''
-
-  return (
-    status === 409 ||
-    (status === 400 &&
-      typeof message === 'string' &&
-      message.toLowerCase().includes('email'))
-  )
-}
-
-// สมัครสมาชิก — SignUpPage เรียกใช้ แล้วส่ง user ไป AuthContext.login
+// สมัครสมาชิก — SignUpPage เรียกใช้ แล้วส่ง { token, user } ไป AuthContext.login
 export async function registerUser({ name, username, email, password }) {
   try {
-    const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+    const { data } = await apiClient.post('/auth/register', {
       name,
       username,
       email,
       password,
     })
-    return sanitizeUser(response.data?.user ?? { name, username, email })
+    return { token: data.token, user: data.user }
   } catch (error) {
-    if (error.response?.status === 404) {
-      return registerLocally({ name, username, email, password })
-    }
-
-    if (isEmailTakenError(error)) {
-      const takenError = new Error(EMAIL_TAKEN_MESSAGE)
+    // backend ตอบ 409 เมื่ออีเมลหรือ username ถูกใช้แล้ว
+    if (getApiErrorStatus(error) === 409) {
+      const takenError = new Error(getApiErrorMessage(error, EMAIL_TAKEN_MESSAGE))
       takenError.code = 'EMAIL_TAKEN'
       throw takenError
     }
-
-    throw error
+    throw new Error(getApiErrorMessage(error, 'Failed to create account'))
   }
 }
 
-// fallback login จาก localStorage เมื่อ API ไม่มี endpoint login (404)
-function loginLocally({ email, password }) {
-  const identifier = email.trim().toLowerCase()
-  const user = getStoredUsers().find(
-    (entry) =>
-      entry.email === identifier ||
-      entry.username?.trim().toLowerCase() === identifier,
-  )
-
-  if (!user || user.password !== password) {
-    const error = new Error(INVALID_CREDENTIALS_MESSAGE)
-    error.code = 'INVALID_CREDENTIALS'
-    throw error
-  }
-
-  return sanitizeUser(user)
-}
-
-function isInvalidCredentialsError(error) {
-  const status = error.response?.status
-
-  return status === 401 || status === 400
-}
-
-// เข้าสู่ระบบ — LoginPage เรียกใช้ แล้วส่ง user ไป AuthContext.login
+// เข้าสู่ระบบ — LoginPage เรียกใช้ แล้วส่ง { token, user } ไป AuthContext.login
+// ช่อง email ส่งได้ทั้งอีเมลและ username (backend รับทั้งสองแบบ)
 export async function loginUser({ email, password }) {
   try {
-    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
-      email,
-      password,
-    })
-    return sanitizeUser(response.data?.user ?? response.data)
+    const { data } = await apiClient.post('/auth/login', { email, password })
+    return { token: data.token, user: data.user }
   } catch (error) {
-    if (error.response?.status === 404) {
-      return loginLocally({ email, password })
-    }
-
-    if (isInvalidCredentialsError(error)) {
+    const status = getApiErrorStatus(error)
+    if (status === 401 || status === 400) {
       const credentialsError = new Error(INVALID_CREDENTIALS_MESSAGE)
       credentialsError.code = 'INVALID_CREDENTIALS'
       throw credentialsError
     }
+    throw new Error(getApiErrorMessage(error, 'Failed to log in'))
+  }
+}
 
+// ดึงข้อมูลผู้ใช้ล่าสุดจาก token ที่มีอยู่ — AuthContext เรียกตอนเปิดแอป
+// คืน null ถ้าไม่มี token หรือ token ใช้ไม่ได้แล้ว
+export async function fetchCurrentUser() {
+  if (!getToken()) return null
+
+  try {
+    const { data } = await apiClient.get('/auth/me')
+    return data
+  } catch (error) {
+    if (getApiErrorStatus(error) === 401) {
+      clearSession()
+      return null
+    }
     throw error
+  }
+}
+
+// อัปเดต name, username, avatar — ProfilePage เรียกใช้
+export async function updateUserProfile({ name, username, avatar }) {
+  try {
+    const { data } = await apiClient.put('/auth/profile', {
+      ...(name !== undefined ? { name: name.trim() } : {}),
+      ...(username !== undefined ? { username: username.trim() } : {}),
+      ...(avatar !== undefined ? { avatar } : {}),
+    })
+    saveUserToSession(data)
+    return data
+  } catch (error) {
+    if (getApiErrorStatus(error) === 409) {
+      throw new Error(getApiErrorMessage(error, 'Username is already taken'))
+    }
+    throw new Error(getApiErrorMessage(error, 'Failed to update profile'))
+  }
+}
+
+// เปลี่ยนรหัสผ่าน — ResetPasswordPage เรียกใช้
+// backend ตรวจรหัสผ่านเดิมให้ (ตอบ 401 ถ้าผิด) จึงไม่ต้องเก็บรหัสผ่านไว้ในเบราว์เซอร์อีก
+export async function resetUserPassword({ currentPassword, newPassword }) {
+  try {
+    await apiClient.put('/auth/reset-password', { currentPassword, newPassword })
+  } catch (error) {
+    if (getApiErrorStatus(error) === 401) {
+      const wrongError = new Error(WRONG_PASSWORD_MESSAGE)
+      wrongError.code = 'WRONG_PASSWORD'
+      throw wrongError
+    }
+    throw new Error(getApiErrorMessage(error, 'Failed to update password'))
   }
 }

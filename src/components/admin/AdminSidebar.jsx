@@ -10,7 +10,7 @@ import {
   User,
 } from 'lucide-react'
 import hhLogo from '@/assets/hh..png'
-import { clearAdminSession } from '@/services/adminApi'
+import { useAuth } from '@/contexts/AuthContext'
 
 const navItemClassName =
   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#43403B]'
@@ -26,9 +26,11 @@ const navItems = [
 export function AdminSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { logout } = useAuth()
 
   function handleLogout() {
-    clearAdminSession()
+    // logout ตัวเดียวกับฝั่งผู้ใช้ทั่วไป — ลบ JWT ทิ้งด้วย ไม่ใช่แค่ flag ใน localStorage
+    logout()
     navigate('/admin/login')
   }
 

@@ -8,8 +8,7 @@ import { Loading } from '@/components/Loading'
 import { ArticleFormFields, INTRO_MAX_LENGTH } from '@/components/admin/ArticleFormFields'
 import { DeleteArticleModal } from '@/components/admin/DeleteArticleModal'
 import { deletePost, fetchPostById, updatePost } from '@/services/postsApi'
-import { removePostStatus, setPostStatus } from '@/services/adminPosts'
-import { getAuthorName } from '@/services/adminProfile'
+import { getCategoryNames } from '@/services/adminCategories'
 
 export function EditArticlePage() {
   const { id } = useParams()
@@ -17,6 +16,7 @@ export function EditArticlePage() {
   const fileInputRef = useRef(null)
 
   const [isLoading, setIsLoading] = useState(true)
+  const [categoryOptions, setCategoryOptions] = useState([])
   const [thumbnail, setThumbnail] = useState('')
   const [category, setCategory] = useState('')
   const [author, setAuthor] = useState('')
@@ -32,16 +32,22 @@ export function EditArticlePage() {
       setIsLoading(true)
 
       try {
-        const post = await fetchPostById(id)
+        // โหลดบทความและรายชื่อหมวดหมู่พร้อมกัน เร็วกว่าโหลดต่อกันทีละอย่าง
+        const [post, names] = await Promise.all([
+          fetchPostById(id),
+          getCategoryNames(),
+        ])
+        setCategoryOptions(names)
         setThumbnail(post.image ?? '')
         setCategory(post.category ?? '')
-        setAuthor(getAuthorName())
+        // ผู้เขียนเดิมของบทความ ไม่ใช่ชื่อ admin ที่กำลังแก้ ไม่งั้นแก้บทความคนอื่นแล้วชื่อจะเปลี่ยน
+        setAuthor(post.author ?? '')
         setTitle(post.title ?? '')
         setIntroduction(post.description ?? '')
         setContent(post.content ?? '')
       } catch (error) {
         console.error('Failed to fetch article:', error)
-        toast.error('Failed to load article')
+        toast.error('Failed to load article', { description: error.message })
         navigate('/admin/articles')
       } finally {
         setIsLoading(false)
@@ -105,9 +111,8 @@ export function EditArticlePage() {
         category,
         author,
         image: thumbnail,
+        status,
       })
-
-      setPostStatus(id, status)
 
       toast.success(status === 'draft' ? 'Saved as draft' : 'Article saved', {
         description:
@@ -119,7 +124,7 @@ export function EditArticlePage() {
     } catch (error) {
       console.error('Failed to update article:', error)
       toast.error('Failed to save article', {
-        description: 'Please try again later.',
+        description: error.message || 'Please try again later.',
       })
     } finally {
       setIsSubmitting(false)
@@ -131,13 +136,12 @@ export function EditArticlePage() {
 
     try {
       await deletePost(id)
-      removePostStatus(id)
       toast.success('Article deleted')
       navigate('/admin/articles')
     } catch (error) {
       console.error('Failed to delete article:', error)
       toast.error('Failed to delete article', {
-        description: 'Please try again later.',
+        description: error.message || 'Please try again later.',
       })
     } finally {
       setIsDeleting(false)
@@ -157,7 +161,7 @@ export function EditArticlePage() {
     <>
       <div className="px-8 py-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-bold text-foreground">Create article</h1>
+          <h1 className="text-2xl font-bold text-foreground">Edit article</h1>
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
@@ -188,6 +192,7 @@ export function EditArticlePage() {
               onFileChange={handleFileChange}
               category={category}
               onCategoryChange={(event) => setCategory(event.target.value)}
+              categoryOptions={categoryOptions}
               author={author}
               title={title}
               onTitleChange={(event) => setTitle(event.target.value)}

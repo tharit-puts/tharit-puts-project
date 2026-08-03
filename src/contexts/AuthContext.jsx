@@ -1,40 +1,82 @@
-// Context จัดการสถานะ login ทั้งแอป — ใช้ร่วมกับ NavBar, LoginPage, SignUpPage
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+// Context จัดการสถานะ login ทั้งแอป — ใช้ร่วมกับ NavBar, LoginPage, SignUpPage, Admin
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import {
   clearNotifications,
   clearSession,
+  fetchCurrentUser,
   getCurrentUser,
   getHasNotifications,
+  hasToken,
   saveSession,
   updateUserProfile,
-} from '@/services/authApi' // อ่าน/เขียน session ใน localStorage
+} from '@/services/authApi'
 
 const AuthContext = createContext(null)
 
 // ครอบแอปใน App.jsx — ให้ทุก component เรียก useAuth() ได้
 export function AuthProvider({ children }) {
-  // โหลด user จาก localStorage ตอนเปิดแอป (ถ้าเคย login ไว้)
+  // เริ่มจากข้อมูลใน localStorage เพื่อให้หน้าเว็บวาดได้ทันทีไม่กระพริบ
   const [user, setUser] = useState(getCurrentUser)
   const [hasNotifications, setHasNotifications] = useState(getHasNotifications)
+  // true จนกว่าจะยืนยัน token กับ backend เสร็จ — หน้า admin ใช้กันการเด้งออกก่อนเวลา
+  const [isLoading, setIsLoading] = useState(hasToken)
 
-  // เรียกหลัง login/signup สำเร็จ — บันทึก session แล้วอัปเดต state
-  const login = useCallback((userData) => {
-    saveSession(userData)
-    setUser(getCurrentUser())
-    setHasNotifications(true)
+  // ตอนเปิดแอป ถ้ามี token อยู่ให้ถาม backend ว่ายังใช้ได้ไหมและข้อมูลล่าสุดเป็นอะไร
+  // จำเป็นเพราะ token อาจหมดอายุ หรือ role อาจถูกเปลี่ยนหลังจากที่ login ไว้
+  useEffect(() => {
+    if (!hasToken()) {
+      setUser(null)
+      setIsLoading(false)
+      return
+    }
+
+    let isActive = true
+
+    fetchCurrentUser()
+      .then((freshUser) => {
+        if (!isActive) return
+        setUser(freshUser)
+      })
+      .catch((error) => {
+        // เช่น backend ล่มหรือเน็ตหลุด — ใช้ข้อมูลเดิมใน localStorage ต่อไป ไม่เตะผู้ใช้ออก
+        console.error('Failed to verify session:', error)
+      })
+      .finally(() => {
+        if (isActive) setIsLoading(false)
+      })
+
+    return () => {
+      isActive = false
+    }
   }, [])
 
-  // เรียกจาก NavBar เมื่อกด Log out — ลบ session แล้วกลับเป็น guest
+  // เรียกหลัง login/signup สำเร็จ — รับ { token, user } จาก authApi
+  const login = useCallback(({ token, user: userData }) => {
+    saveSession({ token, user: userData })
+    setUser(userData)
+    setHasNotifications(true)
+    setIsLoading(false)
+  }, [])
+
+  // เรียกจาก NavBar เมื่อกด Log out — ลบ token + session แล้วกลับเป็น guest
   const logout = useCallback(() => {
     clearSession()
     setUser(null)
     setHasNotifications(false)
   }, [])
 
-  // อัปเดต profile — ProfilePage เรียกหลังกด Save
-  const updateProfile = useCallback((updates) => {
-    updateUserProfile(updates)
-    setUser(getCurrentUser())
+  // อัปเดต profile — ProfilePage เรียกหลังกด Save (ตอนนี้เป็น async เพราะยิงไป backend)
+  const updateProfile = useCallback(async (updates) => {
+    const updatedUser = await updateUserProfile(updates)
+    setUser(updatedUser)
+    return updatedUser
   }, [])
 
   // ลบจุดแดงแจ้งเตือน — NotificationDropdown เรียกเมื่อเปิด dropdown
@@ -46,13 +88,23 @@ export function AuthProvider({ children }) {
   const value = useMemo(
     () => ({
       user,
+      isLoading,
+      isAdmin: user?.role === 'admin',
       login,
       logout,
       updateProfile,
       hasNotifications,
       markNotificationsRead,
     }),
-    [user, login, logout, updateProfile, hasNotifications, markNotificationsRead],
+    [
+      user,
+      isLoading,
+      login,
+      logout,
+      updateProfile,
+      hasNotifications,
+      markNotificationsRead,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

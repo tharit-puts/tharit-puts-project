@@ -1,7 +1,7 @@
-// บริการ login สำหรับ admin — AdminLoginPage เรียกใช้
-export const ADMIN_EMAIL = 'admin@gmail.com'
-export const ADMIN_USERNAME = 'admin'
-export const ADMIN_PASSWORD = 'admin'
+// บริการ login สำหรับ admin — ใช้ระบบ auth จริงของ backend
+// เมื่อก่อนรหัสผ่าน admin ถูก hardcode ไว้ในไฟล์นี้ ซึ่งใครเปิดดูโค้ดก็เห็น
+// ตอนนี้ตรวจกับ database และเช็คว่า role = 'admin' จริงหรือไม่
+import { loginUser } from '@/services/authApi'
 
 export const ADMIN_INVALID_CREDENTIALS_TITLE =
   'Your password is incorrect or this email doesn\u2019t exist'
@@ -9,40 +9,34 @@ export const ADMIN_INVALID_CREDENTIALS_TITLE =
 export const ADMIN_INVALID_CREDENTIALS_DESCRIPTION =
   'Please try another password or email'
 
-const ADMIN_SESSION_KEY = 'hh_admin_session'
-const ADMIN_PASSWORD_KEY = 'hh_admin_password'
+export const NOT_ADMIN_TITLE = 'This account does not have admin access'
 
-export function getAdminSession() {
-  return localStorage.getItem(ADMIN_SESSION_KEY) === 'true'
-}
+export const NOT_ADMIN_DESCRIPTION =
+  'Please log in with an administrator account'
 
-export function clearAdminSession() {
-  localStorage.removeItem(ADMIN_SESSION_KEY)
-}
+/**
+ * login สำหรับ admin — คืน { token, user } ให้หน้า AdminLoginPage ส่งต่อให้ AuthContext
+ *
+ * ถ้ารหัสผ่านถูกแต่ไม่ใช่ admin จะโยน error คนละแบบ เพื่อให้แสดงข้อความที่ตรงกับปัญหา
+ */
+export async function loginAdmin({ emailOrUsername, password }) {
+  let result
 
-// รหัสผ่านปัจจุบัน — อ่านจาก localStorage ถ้ามี ไม่งั้นใช้ค่าเริ่มต้น
-export function getAdminPassword() {
-  return localStorage.getItem(ADMIN_PASSWORD_KEY) ?? ADMIN_PASSWORD
-}
-
-// เปลี่ยนรหัสผ่าน admin — Reset password ใช้
-export function updateAdminPassword(newPassword) {
-  localStorage.setItem(ADMIN_PASSWORD_KEY, newPassword)
-}
-
-export function loginAdmin({ emailOrUsername, password }) {
-  const identifier = emailOrUsername.trim().toLowerCase()
-  const isValidIdentifier =
-    identifier === ADMIN_EMAIL.toLowerCase() ||
-    identifier === ADMIN_USERNAME.toLowerCase()
-  const isValidPassword = password === getAdminPassword()
-
-  if (isValidIdentifier && isValidPassword) {
-    localStorage.setItem(ADMIN_SESSION_KEY, 'true')
-    return { email: ADMIN_EMAIL, username: ADMIN_USERNAME }
+  try {
+    // backend รับทั้งอีเมลและ username ในช่อง email
+    result = await loginUser({ email: emailOrUsername, password })
+  } catch (error) {
+    const adminError = new Error(ADMIN_INVALID_CREDENTIALS_TITLE)
+    adminError.code = 'ADMIN_INVALID_CREDENTIALS'
+    adminError.cause = error
+    throw adminError
   }
 
-  const error = new Error(ADMIN_INVALID_CREDENTIALS_TITLE)
-  error.code = 'ADMIN_INVALID_CREDENTIALS'
-  throw error
+  if (result.user?.role !== 'admin') {
+    const notAdmin = new Error(NOT_ADMIN_TITLE)
+    notAdmin.code = 'NOT_ADMIN'
+    throw notAdmin
+  }
+
+  return result
 }

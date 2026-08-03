@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Loading } from '@/components/Loading'
 import { DeleteArticleModal } from '@/components/admin/DeleteArticleModal'
 import { deletePost, fetchAllPosts } from '@/services/postsApi'
-import { getPostStatus, getStatusLabel, removePostStatus } from '@/services/adminPosts'
+import { getStatusLabel } from '@/services/adminPosts'
 import searchIcon from '@/assets/Search_light.png'
 
 const statusOptions = [
@@ -54,6 +54,9 @@ export function ArticleManagementPage() {
         setPosts(data)
       } catch (error) {
         console.error('Failed to fetch admin posts:', error)
+        toast.error('Failed to load articles', {
+          description: error.message,
+        })
         setPosts([])
       } finally {
         setIsLoading(false)
@@ -70,14 +73,13 @@ export function ArticleManagementPage() {
 
     try {
       await deletePost(deleteTarget.id)
-      removePostStatus(deleteTarget.id)
       setPosts((current) => current.filter((post) => post.id !== deleteTarget.id))
       toast.success('Article deleted')
       setDeleteTarget(null)
     } catch (error) {
       console.error('Failed to delete article:', error)
       toast.error('Failed to delete article', {
-        description: 'Please try again later.',
+        description: error.message || 'Please try again later.',
       })
     } finally {
       setIsDeleting(false)
@@ -91,11 +93,11 @@ export function ArticleManagementPage() {
 
   const filteredPosts = useMemo(() => {
     return posts.filter((post) => {
-      const status = getPostStatus(post.id)
+      // status มาจากคอลัมน์ status ในตาราง posts แล้ว ไม่ต้องอ่านจาก localStorage
       const matchesSearch = post.title
         .toLowerCase()
         .includes(searchQuery.trim().toLowerCase())
-      const matchesStatus = statusFilter === 'all' || status === statusFilter
+      const matchesStatus = statusFilter === 'all' || post.status === statusFilter
       const matchesCategory =
         categoryFilter === 'all' || post.category === categoryFilter
 
@@ -189,7 +191,7 @@ export function ArticleManagementPage() {
               >
                 <p className="truncate text-sm font-medium text-foreground">{post.title}</p>
                 <p className="text-sm text-[#43403B]">{post.category}</p>
-                <StatusBadge status={getPostStatus(post.id)} />
+                <StatusBadge status={post.status} />
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
