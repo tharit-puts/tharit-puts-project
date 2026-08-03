@@ -11,16 +11,16 @@ import { EMAIL_TAKEN_MESSAGE, registerUser } from '@/services/authApi'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-function validateEmail(value) {
-  if (!value.trim() || !EMAIL_PATTERN.test(value.trim())) {
+// ตรวจรูปแบบอีเมล — แสดง error ใต้ช่อง email
+function validateEmail(value) {  if (!value.trim() || !EMAIL_PATTERN.test(value.trim())) {
     return 'Email must be a valid email'
   }
 
   return ''
 }
 
-function validatePassword(value) {
-  if (!value || value.length < 6) {
+// ตรวจความยาวรหัสผ่านขั้นต่ำ 6 ตัวอักษร
+function validatePassword(value) {  if (!value || value.length < 6) {
     return 'Password must be at least 6 characters'
   }
 
@@ -31,8 +31,8 @@ export function SignUpPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const { login } = useAuth()
+  // แสดง loading สั้นๆ ตอนเข้าหน้า — ใช้ usePageLoading hook
   const isLoading = usePageLoading([location.pathname])
-
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({ email: '', password: '' })
@@ -47,7 +47,7 @@ export function SignUpPage() {
   function handleEmailChange(event) {
     const { value } = event.target
     setEmail(value)
-
+    
     if (shouldValidateField('email')) {
       setErrors((prev) => ({ ...prev, email: validateEmail(value) }))
     }
@@ -72,8 +72,8 @@ export function SignUpPage() {
     setErrors((prev) => ({ ...prev, password: validatePassword(password) }))
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault()
+  // ส่งข้อมูลไป authApi → login ใน AuthContext → ไปหน้า registration-success
+  async function handleSubmit(event) {    event.preventDefault()
     setSubmitAttempted(true)
     setTouched({ email: true, password: true })
 
@@ -93,8 +93,9 @@ export function SignUpPage() {
     setIsSubmitting(true)
 
     try {
-      const user = await registerUser({ name, username, email, password })
-      login(user)
+      // backend คืน { token, user } — ส่งทั้งก้อนให้ AuthContext เก็บ token ไว้
+      const session = await registerUser({ name, username, email, password })
+      await login(session)
       navigate('/registration-success')
     } catch (error) {
       if (error.code === 'EMAIL_TAKEN' || error.message === EMAIL_TAKEN_MESSAGE) {

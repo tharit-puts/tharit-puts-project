@@ -1,8 +1,17 @@
-import axios from 'axios'
+// บริการจัดการบทความ — คุยกับ backend ของเราเอง (Express + PostgreSQL) โดยตรง
+// เชื่อมกับ: ArticleSection, BlogDetailPage, Admin (Article management / Create / Edit)
+import { apiClient, API_BASE_URL, getApiErrorMessage } from '@/lib/apiClient'
 
-export const API_BASE_URL = 'https://blog-post-project-api.vercel.app'
-export const POSTS_PER_PAGE = 6
+export { API_BASE_URL }
 
+export const POSTS_PER_PAGE = 6 // จำนวนบทความต่อหน้า — ต้องตรงกับที่ backend ใช้เป็นค่า default
+
+export const DEFAULT_POST_IMAGE =
+  'https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449771/my-blog-post/e739huvlalbfz9eynysc.jpg'
+
+// --- date utility ------------------------------------------------------------
+
+// แปลงวันที่ ISO จาก backend เป็นรูปแบบอ่านง่าย — BlogCard, BlogDetailPage ใช้
 export function formatPostDate(dateString) {
   return new Date(dateString).toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -11,31 +20,146 @@ export function formatPostDate(dateString) {
   })
 }
 
-export async function fetchPosts({ page, category, keyword }) {
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: String(POSTS_PER_PAGE),
-  })
+// --- read --------------------------------------------------------------------
 
+// ดึงรายการบทความแบบแบ่งหน้า — ArticleSection เรียกเมื่อเปลี่ยน category/search/page
+// การกรองและแบ่งหน้าทำที่ backend ทั้งหมด (เมื่อก่อนโหลดมาทั้งก้อนแล้วกรองในเบราว์เซอร์)
+export async function fetchPosts({ page = 1, category, keyword } = {}) {
+  const params = { page, limit: POSTS_PER_PAGE }
+
+  // 'Highlight' หมายถึงดูทั้งหมด backend เข้าใจค่านี้อยู่แล้ว แต่ไม่ส่งไปเลยก็ได้
   if (category && category !== 'Highlight') {
-    params.append('category', category)
+    params.category = category
   }
 
-  if (keyword?.trim()) {
-    params.append('keyword', keyword.trim())
+  const trimmedKeyword = keyword?.trim()
+  if (trimmedKeyword) {
+    params.keyword = trimmedKeyword
   }
 
-  const response = await axios.get(`${API_BASE_URL}/posts?${params}`)
-  return response.data
+  const { data } = await apiClient.get('/posts', { params })
+
+  return {
+    posts: data.posts,
+    currentPage: data.currentPage,
+    totalPages: data.totalPages,
+    totalPosts: data.totalPosts,
+  }
 }
 
+async function fetchPostsByParams(params) {
+  const posts = []
+  let page = 1
+  let totalPages = 1
+
+  // ไล่เก็บทุกหน้าเพราะ backend จำกัด limit ไว้ที่ 100 ต่อครั้ง
+  do {
+    const { data } = await apiClient.get('/posts', {
+      params: { page, limit: 100, ...params },
+    })
+    posts.push(...data.posts)
+    totalPages = data.totalPages
+    page += 1
+  } while (page <= totalPages)
+
+  return posts
+}
+
+// ดึงบทความทั้งหมดรวม draft — หน้า Article management ของ admin ใช้
+export async function fetchAllPosts() {
+  return fetchPostsByParams({ status: 'all' })
+}
+
+// ดึงเฉพาะบทความของตัวเองรวม draft — หน้า My articles ของ user ใช้
+export async function fetchMyPosts() {
+  return fetchPostsByParams({ status: 'all', mine: true })
+}
+
+// ดึงบทความเดียวตาม id — BlogDetailPage / Edit article ใช้
 export async function fetchPostById(id) {
-  const response = await axios.get(`${API_BASE_URL}/posts/${id}`)
-  return response.data
+  try {
+    const { data } = await apiClient.get(`/posts/${id}`)
+    return data
+  } catch (error) {
+    if (error.response?.status === 404) {
+      const notFound = new Error('Post not found')
+      notFound.code = 'POST_NOT_FOUND'
+      throw notFound
+    }
+    throw error
+  }
 }
 
+// --- write (ต้อง login — แก้/ลบได้เฉพาะบทความของตัวเอง หรือเป็น admin) -------
+
+// สร้างบทความใหม่ — ใช้ได้ทั้ง admin และ user
+export async function createPost({
+  title,
+  description,
+  content,
+  category,
+  author,
+  image,
+  status = 'draft',
+}) {
+  try {
+    const { data } = await apiClient.post('/posts', {
+      title,
+      description,
+      content,
+      category,
+      author,
+      image: image || DEFAULT_POST_IMAGE,
+      status,
+    })
+    return data
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, 'Failed to create article'))
+  }
+}
+
+// อัปเดตบทความ — Admin Edit article ใช้
+export async function updatePost(
+  id,
+  { title, description, content, category, author, image, status },
+) {
+  try {
+    const { data } = await apiClient.put(`/posts/${id}`, {
+      title,
+      description,
+      content,
+      category,
+      author,
+      image: image || DEFAULT_POST_IMAGE,
+      ...(status ? { status } : {}),
+    })
+    return data
+  } catch (error) {
+    if (error.response?.status === 404) {
+      const notFound = new Error('Post not found')
+      notFound.code = 'POST_NOT_FOUND'
+      throw notFound
+    }
+    throw new Error(getApiErrorMessage(error, 'Failed to save article'))
+  }
+}
+
+// ลบบทความ — Admin Delete article ใช้
+export async function deletePost(id) {
+  try {
+    await apiClient.delete(`/posts/${id}`)
+    return { id }
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, 'Failed to delete article'))
+  }
+}
+
+// --- content parsing ---------------------------------------------------------
+
+// แปลง content (markdown) เป็น sections สำหรับ BlogContent
+// แบ่งเป็น intro, หัวข้อก่อนรูป, หัวข้อหลังรูป
 export function parsePostContent(description, content) {
-  const sectionBlocks = content
+  const sectionBlocks = (content ?? '')
     .split(/## \d+\.\s/)
     .map((block) => block.trim())
     .filter(Boolean)

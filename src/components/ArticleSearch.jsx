@@ -1,3 +1,5 @@
+// ช่องค้นหาบทความพร้อม dropdown ผลลัพธ์
+// เชื่อมกับ: ArticleSection (ส่ง searchQuery, results) → navigate ไป /post/:id
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import searchIcon from '@/assets/Search_light.png'

@@ -1,3 +1,4 @@
+// หน้าแจ้งสมัครสมาชิกสำเร็จ — SignUpPage navigate มาหลัง register สำเร็จ
 import { Link, useLocation } from 'react-router-dom'
 import { CircleCheck } from 'lucide-react'
 import { NavBar } from '@/components/NavBar'

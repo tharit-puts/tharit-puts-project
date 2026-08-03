@@ -1,3 +1,4 @@
+// เมนู dropdown สำเร็จรูปจาก shadcn/base-ui — ใช้ใน NavBar (mobile menu, profile menu)
 import * as React from "react"
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
 
