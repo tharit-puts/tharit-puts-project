@@ -1,6 +1,6 @@
 // หน้า Create article — ฟอร์มสร้างบทความใหม่ใน admin panel
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { ArticleFormFields, INTRO_MAX_LENGTH } from '@/components/admin/ArticleFormFields'
@@ -10,9 +10,12 @@ import { useAuth } from '@/contexts/AuthContext'
 
 export function CreateArticlePage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const fileInputRef = useRef(null)
   const { user } = useAuth()
-  // ชื่อผู้เขียนมาจากบัญชี admin ที่ login อยู่
+  const isMyArticles = location.pathname.startsWith('/my-articles')
+  const listPath = isMyArticles ? '/my-articles' : '/admin/articles'
+  // ชื่อผู้เขียนมาจากบัญชีที่ login อยู่
   const authorName = user?.name ?? ''
 
   const [categoryOptions, setCategoryOptions] = useState([])
@@ -90,7 +93,7 @@ export function CreateArticlePage() {
             ? 'Your article has been saved as a draft.'
             : 'Your article is now live.',
       })
-      navigate('/admin/articles')
+      navigate(listPath)
     } catch (error) {
       console.error('Failed to create article:', error)
       // แสดงข้อความจริงจาก backend เช่น เตือนว่า content ไม่มีหัวข้อ "## 1. "

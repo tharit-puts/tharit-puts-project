@@ -1,5 +1,6 @@
 // ข้อมูล mock สำหรับ comments — backend ยังไม่มีตาราง comments
-// เชื่อมกับ: BlogDetailPage (pickComments)
+// คอมเมนต์ตัวอย่างเก่า — หน้า BlogDetailPage ใช้ comments จาก backend แล้ว
+// ไฟล์นี้เหลือไว้เป็นอ้างอิง ไม่ถูก import อีก
 const commentPool = [
   {
     name: "Jacob Lash",

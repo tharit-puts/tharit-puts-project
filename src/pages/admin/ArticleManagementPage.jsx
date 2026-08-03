@@ -1,12 +1,12 @@
-// หน้า Article management — แสดง/ค้นหา/กรองบทความจาก API
+// หน้า Article management — ใช้ทั้ง admin (/admin/articles) และ user (/my-articles)
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Loading } from '@/components/Loading'
 import { DeleteArticleModal } from '@/components/admin/DeleteArticleModal'
-import { deletePost, fetchAllPosts } from '@/services/postsApi'
+import { deletePost, fetchAllPosts, fetchMyPosts } from '@/services/postsApi'
 import { getStatusLabel } from '@/services/adminPosts'
 import searchIcon from '@/assets/Search_light.png'
 
@@ -37,6 +37,12 @@ function StatusBadge({ status }) {
 
 export function ArticleManagementPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // /my-articles = ดูเฉพาะของตัวเอง /admin/articles = admin ดูทั้งหมด
+  const isMyArticles = location.pathname.startsWith('/my-articles')
+  const basePath = isMyArticles ? '/my-articles' : '/admin/articles'
+  const pageTitle = isMyArticles ? 'My articles' : 'Article management'
+
   const [posts, setPosts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -50,10 +56,10 @@ export function ArticleManagementPage() {
       setIsLoading(true)
 
       try {
-        const data = await fetchAllPosts()
+        const data = isMyArticles ? await fetchMyPosts() : await fetchAllPosts()
         setPosts(data)
       } catch (error) {
-        console.error('Failed to fetch admin posts:', error)
+        console.error('Failed to fetch posts:', error)
         toast.error('Failed to load articles', {
           description: error.message,
         })
@@ -64,7 +70,7 @@ export function ArticleManagementPage() {
     }
 
     loadPosts()
-  }, [])
+  }, [isMyArticles])
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return
@@ -109,10 +115,10 @@ export function ArticleManagementPage() {
     <>
       <div className="flex h-screen flex-col px-8 py-10">
       <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Article management</h1>
+        <h1 className="text-2xl font-bold text-foreground">{pageTitle}</h1>
         <Button
           type="button"
-          onClick={() => navigate('/admin/articles/new')}
+          onClick={() => navigate(`${basePath}/new`)}
           className="h-11 rounded-full px-5 text-sm font-medium"
         >
           <Plus className="h-4 w-4" />
@@ -196,7 +202,7 @@ export function ArticleManagementPage() {
                   <button
                     type="button"
                     aria-label={`Edit ${post.title}`}
-                    onClick={() => navigate(`/admin/articles/${post.id}/edit`)}
+                    onClick={() => navigate(`${basePath}/${post.id}/edit`)}
                     className="text-[#75716B] transition-colors hover:text-foreground"
                   >
                     <Pencil className="h-4 w-4" />

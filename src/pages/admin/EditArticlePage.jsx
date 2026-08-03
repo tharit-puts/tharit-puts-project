@@ -1,19 +1,24 @@
 // หน้า Edit article — แก้ไข/ลบบทความใน admin panel
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Loading } from '@/components/Loading'
 import { ArticleFormFields, INTRO_MAX_LENGTH } from '@/components/admin/ArticleFormFields'
 import { DeleteArticleModal } from '@/components/admin/DeleteArticleModal'
+import { useAuth } from '@/contexts/AuthContext'
 import { deletePost, fetchPostById, updatePost } from '@/services/postsApi'
 import { getCategoryNames } from '@/services/adminCategories'
 
 export function EditArticlePage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const { user, isAdmin } = useAuth()
   const fileInputRef = useRef(null)
+  const isMyArticles = location.pathname.startsWith('/my-articles')
+  const listPath = isMyArticles ? '/my-articles' : '/admin/articles'
 
   const [isLoading, setIsLoading] = useState(true)
   const [categoryOptions, setCategoryOptions] = useState([])
@@ -37,6 +42,15 @@ export function EditArticlePage() {
           fetchPostById(id),
           getCategoryNames(),
         ])
+
+        // หน้า My articles ห้ามเปิดบทความของคนอื่น (แม้จะเดา URL ก็ตาม)
+        const isOwner = post.authorId != null && Number(post.authorId) === Number(user?.id)
+        if (isMyArticles && !isOwner && !isAdmin) {
+          toast.error('You can only edit your own articles')
+          navigate(listPath)
+          return
+        }
+
         setCategoryOptions(names)
         setThumbnail(post.image ?? '')
         setCategory(post.category ?? '')
@@ -48,14 +62,14 @@ export function EditArticlePage() {
       } catch (error) {
         console.error('Failed to fetch article:', error)
         toast.error('Failed to load article', { description: error.message })
-        navigate('/admin/articles')
+        navigate(listPath)
       } finally {
         setIsLoading(false)
       }
     }
 
     loadPost()
-  }, [id, navigate])
+  }, [id, navigate, listPath, isMyArticles, isAdmin, user?.id])
 
   function handleUploadClick() {
     fileInputRef.current?.click()
@@ -120,7 +134,7 @@ export function EditArticlePage() {
             ? 'Your changes have been saved as a draft.'
             : 'Your article has been updated.',
       })
-      navigate('/admin/articles')
+      navigate(listPath)
     } catch (error) {
       console.error('Failed to update article:', error)
       toast.error('Failed to save article', {
@@ -137,7 +151,7 @@ export function EditArticlePage() {
     try {
       await deletePost(id)
       toast.success('Article deleted')
-      navigate('/admin/articles')
+      navigate(listPath)
     } catch (error) {
       console.error('Failed to delete article:', error)
       toast.error('Failed to delete article', {

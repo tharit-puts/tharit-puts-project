@@ -50,7 +50,7 @@ export function LoginPage() {
     try {
       // backend คืน { token, user } — ส่งทั้งก้อนให้ AuthContext เก็บ token ไว้ใช้กับ request ต่อไป
       const session = await loginUser({ email: emailOrUsername, password })
-      login(session)
+      await login(session)
       navigate('/')
     } catch (error) {
       if (

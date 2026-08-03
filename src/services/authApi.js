@@ -24,8 +24,8 @@ export const PASSWORD_TOO_SHORT_MESSAGE = 'Password must be at least 6 character
 
 // เก็บ user ที่ login อยู่ไว้ใน localStorage ด้วย เพื่อให้หน้าเว็บวาดได้ทันทีตอนรีเฟรช
 // ไม่ต้องรอ /auth/me ตอบก่อน (แต่ยังยิง /auth/me เพื่อยืนยันและอัปเดตข้อมูลล่าสุด)
+// แจ้งเตือนไม่อยู่ใน localStorage แล้ว — ดึงจาก /notifications แทน
 const SESSION_KEY = 'hh_current_user'
-const NOTIFICATIONS_KEY = 'hh_has_notifications'
 
 export function getCurrentUser() {
   try {
@@ -36,20 +36,10 @@ export function getCurrentUser() {
   }
 }
 
-export function getHasNotifications() {
-  return localStorage.getItem(NOTIFICATIONS_KEY) === 'true'
-}
-
-// ลบจุดแดงแจ้งเตือน — NotificationDropdown เรียกเมื่อเปิด dropdown
-export function clearNotifications() {
-  localStorage.setItem(NOTIFICATIONS_KEY, 'false')
-}
-
 // บันทึก session หลัง login/signup — เก็บทั้ง token และข้อมูล user
 export function saveSession({ token, user }) {
   if (token) setToken(token)
   if (user) localStorage.setItem(SESSION_KEY, JSON.stringify(user))
-  localStorage.setItem(NOTIFICATIONS_KEY, 'true')
 }
 
 // อัปเดตแค่ข้อมูล user ใน session (ไม่แตะ token) — ใช้หลังแก้โปรไฟล์
@@ -61,7 +51,8 @@ export function saveUserToSession(user) {
 export function clearSession() {
   clearToken()
   localStorage.removeItem(SESSION_KEY)
-  localStorage.removeItem(NOTIFICATIONS_KEY)
+  // ล้าง flag เก่าถ้าเคยมีจากเวอร์ชันก่อนหน้า
+  localStorage.removeItem('hh_has_notifications')
 }
 
 export function hasToken() {

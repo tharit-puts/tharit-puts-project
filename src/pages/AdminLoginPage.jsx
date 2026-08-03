@@ -41,7 +41,7 @@ export function AdminLoginPage() {
     try {
       // ตรวจรหัสผ่านกับ database จริง และต้องมี role = admin เท่านั้น
       const session = await loginAdmin({ emailOrUsername, password })
-      login(session)
+      await login(session)
       navigate('/admin/articles')
     } catch (error) {
       setHasLoginError(true)

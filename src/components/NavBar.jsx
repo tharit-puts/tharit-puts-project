@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ChevronDown,
+  FileText,
   LogOut,
   Menu,
   RotateCcw,
@@ -81,10 +82,12 @@ function GuestNav({ isMenuOpen, setIsMenuOpen }) {
 // เมนูสำหรับ member (login แล้ว) — แสดง avatar, แจ้งเตือน, dropdown profile
 function MemberNav({
   user,
+  isAdmin,
   hasNotifications,
   onLogout,
   onProfileClick,
   onResetPasswordClick,
+  onMyArticlesClick,
   onAdminPanelClick,
   onNotificationsOpen,
 }) {
@@ -126,10 +129,19 @@ function MemberNav({
             Reset password
           </DropdownMenuItem>
 
-          <DropdownMenuItem className={menuItemClassName} onClick={onAdminPanelClick}>
-            <SquareArrowOutUpRight className="h-4 w-4" />
-            Admin panel
+          {/* จัดการบทความของตัวเอง — ใช้ได้ทั้ง user และ admin */}
+          <DropdownMenuItem className={menuItemClassName} onClick={onMyArticlesClick}>
+            <FileText className="h-4 w-4" />
+            My articles
           </DropdownMenuItem>
+
+          {/* แสดงเฉพาะบัญชี admin — user ธรรมดาจะไม่เห็นเมนูนี้ */}
+          {isAdmin ? (
+            <DropdownMenuItem className={menuItemClassName} onClick={onAdminPanelClick}>
+              <SquareArrowOutUpRight className="h-4 w-4" />
+              Admin panel
+            </DropdownMenuItem>
+          ) : null}
 
           <DropdownMenuSeparator className="bg-[#DAD6D1]" />
 
@@ -149,7 +161,8 @@ function MemberNav({
 export function NavBar() {
   const navigate = useNavigate()
   // อ่านสถานะ login จาก AuthContext — แสดง GuestNav หรือ MemberNav ตาม user
-  const { user, logout, hasNotifications, markNotificationsRead } = useAuth()
+  const { user, isAdmin, logout, hasNotifications, markNotificationsRead } =
+    useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   function handleLogout() {
@@ -165,8 +178,13 @@ export function NavBar() {
     navigate('/reset-password')
   }
 
+  function handleMyArticlesClick() {
+    navigate('/my-articles')
+  }
+
   function handleAdminPanelClick() {
-    navigate('/admin/login')
+    // admin ที่ login อยู่แล้วเข้า panel ได้เลย ไม่ต้องผ่านหน้า login อีก
+    navigate('/admin/articles')
   }
 
   return (
@@ -179,10 +197,12 @@ export function NavBar() {
         {user ? (
           <MemberNav
             user={user}
+            isAdmin={isAdmin}
             hasNotifications={hasNotifications}
             onLogout={handleLogout}
             onProfileClick={handleProfileClick}
             onResetPasswordClick={handleResetPasswordClick}
+            onMyArticlesClick={handleMyArticlesClick}
             onAdminPanelClick={handleAdminPanelClick}
             onNotificationsOpen={markNotificationsRead}
           />

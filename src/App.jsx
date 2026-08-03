@@ -22,6 +22,7 @@ import { AdminProfilePage } from '@/pages/admin/AdminProfilePage'
 import { AdminNotificationPage } from '@/pages/admin/AdminNotificationPage'
 import { AdminResetPasswordPage } from '@/pages/admin/AdminResetPasswordPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { RequireAuth } from '@/components/RequireAuth'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider } from '@/contexts/AuthContext'
 
@@ -64,6 +65,37 @@ function App() {
 
         {/* หน้าเปลี่ยนรหัสผ่าน — ต้อง login ก่อน */}
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+        {/* บทความของตัวเอง — user และ admin เข้าได้ เห็นเฉพาะโพสต์ที่ตัวเองเป็นเจ้าของ */}
+        <Route element={<RequireAuth />}>
+          <Route
+            path="/my-articles"
+            element={
+              <div className="min-h-screen bg-background">
+                <NavBar />
+                <ArticleManagementPage />
+              </div>
+            }
+          />
+          <Route
+            path="/my-articles/new"
+            element={
+              <div className="min-h-screen bg-background">
+                <NavBar />
+                <CreateArticlePage />
+              </div>
+            }
+          />
+          <Route
+            path="/my-articles/:id/edit"
+            element={
+              <div className="min-h-screen bg-background">
+                <NavBar />
+                <EditArticlePage />
+              </div>
+            }
+          />
+        </Route>
 
         {/* หน้า admin login + panel */}
         <Route path="/admin/login" element={<AdminLoginPage />} />

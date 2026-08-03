@@ -47,9 +47,7 @@ export async function fetchPosts({ page = 1, category, keyword } = {}) {
   }
 }
 
-// ดึงบทความทั้งหมดรวม draft — หน้า Article management ของ admin ใช้
-// ต้องส่ง status=all ซึ่ง backend จะยอมให้เฉพาะ token ที่เป็น admin
-export async function fetchAllPosts() {
+async function fetchPostsByParams(params) {
   const posts = []
   let page = 1
   let totalPages = 1
@@ -57,7 +55,7 @@ export async function fetchAllPosts() {
   // ไล่เก็บทุกหน้าเพราะ backend จำกัด limit ไว้ที่ 100 ต่อครั้ง
   do {
     const { data } = await apiClient.get('/posts', {
-      params: { page, limit: 100, status: 'all' },
+      params: { page, limit: 100, ...params },
     })
     posts.push(...data.posts)
     totalPages = data.totalPages
@@ -65,6 +63,16 @@ export async function fetchAllPosts() {
   } while (page <= totalPages)
 
   return posts
+}
+
+// ดึงบทความทั้งหมดรวม draft — หน้า Article management ของ admin ใช้
+export async function fetchAllPosts() {
+  return fetchPostsByParams({ status: 'all' })
+}
+
+// ดึงเฉพาะบทความของตัวเองรวม draft — หน้า My articles ของ user ใช้
+export async function fetchMyPosts() {
+  return fetchPostsByParams({ status: 'all', mine: true })
 }
 
 // ดึงบทความเดียวตาม id — BlogDetailPage / Edit article ใช้
@@ -82,9 +90,9 @@ export async function fetchPostById(id) {
   }
 }
 
-// --- write (ต้อง login เป็น admin — token แนบให้อัตโนมัติโดย apiClient) -------
+// --- write (ต้อง login — แก้/ลบได้เฉพาะบทความของตัวเอง หรือเป็น admin) -------
 
-// สร้างบทความใหม่ — Admin Create article ใช้
+// สร้างบทความใหม่ — ใช้ได้ทั้ง admin และ user
 export async function createPost({
   title,
   description,

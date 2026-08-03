@@ -1,8 +1,20 @@
 // การ์ดบทความ 1 ชิ้น — รับข้อมูลผ่าน props แล้วแสดงรูป tag หัวข้อ บทย่อ และผู้เขียน
 import { Link } from 'react-router-dom'
-import authorAvatar from '@/assets/man-with-cat.jpg'
+import defaultAvatar from '@/assets/defaultAvatar.png'
 
-export function BlogCard({ id, image, tag, title, excerpt, author, date, onTagClick }) {
+export function BlogCard({
+  id,
+  image,
+  tag,
+  title,
+  excerpt,
+  author,
+  authorAvatar,
+  date,
+  onTagClick,
+}) {
+  const avatarSrc = authorAvatar || defaultAvatar
+
   return (
     <article className="flex flex-col gap-4">
       {/* กดรูปแล้วเข้าหน้าอ่านบทความ */}
@@ -35,7 +47,7 @@ export function BlogCard({ id, image, tag, title, excerpt, author, date, onTagCl
 
         <div className="mt-auto flex items-center gap-3">
           <img
-            src={authorAvatar}
+            src={avatarSrc}
             alt={author}
             className="h-10 w-10 shrink-0 rounded-full object-cover"
           />
