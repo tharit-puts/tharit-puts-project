@@ -93,8 +93,9 @@ export function SignUpPage() {
     setIsSubmitting(true)
 
     try {
-      const user = await registerUser({ name, username, email, password })
-      login(user)
+      // backend คืน { token, user } — ส่งทั้งก้อนให้ AuthContext เก็บ token ไว้
+      const session = await registerUser({ name, username, email, password })
+      await login(session)
       navigate('/registration-success')
     } catch (error) {
       if (error.code === 'EMAIL_TAKEN' || error.message === EMAIL_TAKEN_MESSAGE) {

@@ -1,5 +1,5 @@
 // หน้ารายละเอียดบทความ — ดึงข้อมูลจาก API ตาม id ใน URL /post/:id
-// เชื่อมกับ: postsApi, blogDetails (comments), BlogContent, CommentSection
+// เชื่อมกับ: postsApi, CommentSection (comments จริงจาก backend), BlogContent
 import { useEffect, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { NavBar } from '@/components/NavBar'
@@ -9,7 +9,6 @@ import { BlogContent } from '@/components/BlogContent'
 import { BlogInteraction } from '@/components/BlogInteraction'
 import { CommentSection } from '@/components/CommentSection'
 import { Loading } from '@/components/Loading'
-import { pickComments } from '@/data/blogDetails'
 import {
   fetchPostById,
   formatPostDate,
@@ -49,9 +48,8 @@ export function BlogDetailPage() {
     return <Navigate to="/" replace />
   }
 
-  // แปลง content จาก API + สุ่ม comments ตัวอย่างตาม blog id
+  // แปลง content จาก API เป็น sections สำหรับ BlogContent
   const detail = post ? parsePostContent(post.description, post.content) : null
-  const comments = post ? pickComments(post.id) : []
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,7 +83,11 @@ export function BlogDetailPage() {
               </h1>
 
               <div className="mt-8 lg:hidden">
-                <AuthorCard />
+                <AuthorCard
+                  name={post.author}
+                  avatar={post.authorAvatar}
+                  bio={post.authorBio}
+                />
               </div>
 
               <BlogContent
@@ -96,11 +98,16 @@ export function BlogDetailPage() {
               />
 
               <BlogInteraction initialCount={post.likes} />
-              <CommentSection initialComments={comments} />
+              <CommentSection postId={post.id} />
             </article>
 
             <aside className="hidden lg:block">
-              <AuthorCard className="sticky top-24" />
+              <AuthorCard
+                className="sticky top-24"
+                name={post.author}
+                avatar={post.authorAvatar}
+                bio={post.authorBio}
+              />
             </aside>
           </div>
         </main>

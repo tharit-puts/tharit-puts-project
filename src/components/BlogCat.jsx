@@ -22,6 +22,7 @@ export function BlogCat({
               title={post.title}
               excerpt={post.description}
               author={post.author}
+              authorAvatar={post.authorAvatar}
               date={formatPostDate(post.date)}
               onTagClick={onTagClick}
             />
