@@ -6,7 +6,7 @@ export function HeroSection() {
     <section className="bg-background">
       <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-6 py-16 md:grid-cols-[1fr_auto_1fr] md:gap-8 md:px-10 md:py-20 lg:gap-12">
         {/* คอลัมน์ซ้าย: หัวข้อใหญ่ + คำอธิบายสั้น */}
-        <div className="text-right">
+        <div className="text-center md:text-right">
           <h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground md:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
             Stay
             <br />
@@ -14,7 +14,7 @@ export function HeroSection() {
             <br />
             Stay Inspired
           </h1>
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base font-medium">
+          <p className="mt-4 text-sm font-medium leading-relaxed text-muted-foreground md:text-base">
             Discover a World of Knowledge at Your Fingertips. Your Daily Dose of
             Inspiration and Information.
           </p>
@@ -30,9 +30,9 @@ export function HeroSection() {
         </div>
 
         {/* คอลัมน์ขวา: ข้อมูลผู้เขียน */}
-        <div className="max-w-sm md:max-w-none">
+        <div className="mx-auto max-w-sm text-center md:mx-0 md:max-w-none md:text-left">
           <p className="text-sm text-muted-foreground">-Author</p>
-          <h2 className="text-[#43403B] mt-2 text-xl font-bold">Thompson P.</h2>
+          <h2 className="mt-2 text-xl font-bold text-[#43403B]">Thompson P.</h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground md:text-base font-medium">
             I am a pet enthusiast and freelance writer who specializes in animal
             behavior and care. With a deep love for cats, I enjoy sharing insights

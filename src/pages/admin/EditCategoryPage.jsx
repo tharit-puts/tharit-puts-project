@@ -85,14 +85,14 @@ export function EditCategoryPage() {
 
   return (
     <>
-      <div className="px-8 py-10">
+      <div className="px-4 py-8 md:px-8 md:py-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold text-foreground">Edit category</h1>
           <Button
             type="button"
             disabled={isSubmitting}
             onClick={handleSave}
-            className="h-11 rounded-full px-6 text-sm font-medium"
+            className="h-11 w-full rounded-full px-6 text-sm font-medium sm:w-auto"
           >
             {isSubmitting ? 'Saving...' : 'Save'}
           </Button>

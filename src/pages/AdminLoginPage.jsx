@@ -80,9 +80,11 @@ export function AdminLoginPage() {
     <div className="min-h-screen bg-background">
       <NavBar />
       <main className="flex min-h-screen items-center justify-center px-6 py-16">
-        <div className="mx-auto w-full max-w-md rounded-2xl bg-[#EFEEEB] px-8 py-10">
+        <div className="mx-auto w-full max-w-md rounded-2xl bg-[#EFEEEB] px-5 py-8 sm:px-8 sm:py-10">
           <p className="text-center text-sm font-medium text-[#EB6B47]">Admin panel</p>
-          <h1 className="mt-2 text-center text-3xl font-bold text-foreground">Log in</h1>
+          <h1 className="mt-2 text-center text-2xl font-bold text-foreground sm:text-3xl">
+            Log in
+          </h1>
 
           <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
             <AuthInput
