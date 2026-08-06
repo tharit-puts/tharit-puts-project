@@ -46,8 +46,10 @@ export function AuthInput({
 // กล่องครอบฟอร์มทั้งหมด พร้อมหัวข้อตรงกลาง
 export function AuthFormCard({ title, children }) {
   return (
-    <div className="mx-auto w-full max-w-md rounded-2xl bg-[#EFEEEB] px-8 py-10">
-      <h1 className="text-center text-3xl font-bold text-foreground">{title}</h1>
+    <div className="mx-auto w-full max-w-md rounded-2xl bg-[#EFEEEB] px-5 py-8 sm:px-8 sm:py-10">
+      <h1 className="text-center text-2xl font-bold text-foreground sm:text-3xl">
+        {title}
+      </h1>
       <div className="mt-8 space-y-5">{children}</div>
     </div>
   )

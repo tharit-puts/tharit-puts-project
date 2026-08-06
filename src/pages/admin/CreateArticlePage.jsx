@@ -106,16 +106,16 @@ export function CreateArticlePage() {
   }
 
   return (
-    <div className="px-8 py-10">
+    <div className="px-4 py-8 md:px-8 md:py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-foreground">Create article</h1>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
           <Button
             type="button"
             variant="outline"
             disabled={isSubmitting}
             onClick={() => handleSave('draft')}
-            className="h-11 rounded-full border-[#75716B] px-5 text-sm font-medium"
+            className="h-11 w-full rounded-full border-[#75716B] px-5 text-sm font-medium sm:w-auto"
           >
             Save as draft
           </Button>
@@ -123,14 +123,14 @@ export function CreateArticlePage() {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleSave('published')}
-            className="h-11 rounded-full px-5 text-sm font-medium"
+            className="h-11 w-full rounded-full px-5 text-sm font-medium sm:w-auto"
           >
             {isSubmitting ? 'Saving...' : 'Save and publish'}
           </Button>
         </div>
       </div>
 
-      <div className="mt-8 rounded-2xl bg-[#EFEEEB] px-6 py-8 md:px-10 md:py-10">
+      <div className="mt-8 rounded-2xl bg-[#EFEEEB] px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10">
         <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
           <ArticleFormFields
             fileInputRef={fileInputRef}
