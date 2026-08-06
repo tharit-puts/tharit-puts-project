@@ -62,13 +62,13 @@ export function CategoryManagementPage() {
 
   return (
     <>
-      <div className="px-8 py-10">
+      <div className="px-4 py-8 md:px-8 md:py-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold text-foreground">Category management</h1>
           <Button
             type="button"
             onClick={() => navigate('/admin/categories/new')}
-            className="h-11 rounded-full px-5 text-sm font-medium"
+            className="h-11 w-full rounded-full px-5 text-sm font-medium sm:w-auto"
           >
             <Plus className="h-4 w-4" />
             Create category
@@ -93,7 +93,7 @@ export function CategoryManagementPage() {
         </div>
 
         <div className="mt-6 overflow-hidden rounded-2xl border border-[#EFEEEB]">
-          <div className="border-b border-[#EFEEEB] bg-[#F9F8F6] px-6 py-4 text-sm font-medium text-[#75716B]">
+          <div className="border-b border-[#EFEEEB] bg-[#F9F8F6] px-4 py-4 text-sm font-medium text-[#75716B] sm:px-6">
             Category
           </div>
 
@@ -105,11 +105,13 @@ export function CategoryManagementPage() {
             filteredCategories.map((category, index) => (
               <div
                 key={category.id}
-                className={`flex items-center justify-between gap-4 px-6 py-4 ${
+                className={`flex items-center justify-between gap-4 px-4 py-4 sm:px-6 ${
                   index % 2 === 1 ? 'bg-[#FCFBFA]' : 'bg-white'
                 }`}
               >
-                <p className="text-sm font-medium text-foreground">{category.name}</p>
+                <p className="min-w-0 text-sm font-medium wrap-break-word text-foreground">
+                  {category.name}
+                </p>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"

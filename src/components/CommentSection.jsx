@@ -53,12 +53,14 @@ function CommentAvatar({ name, avatar }) {
 // คอมเมนต์ 1 รายการ
 function CommentItem({ name, text, date, avatar }) {
   return (
-    <div className="flex gap-4 border-b border-[#DAD6D1] py-6 last:border-b-0">
+    <div className="flex gap-3 border-b border-[#DAD6D1] py-6 last:border-b-0 sm:gap-4">
       <CommentAvatar name={name} avatar={avatar} />
-      <div>
-        <p className="font-bold text-foreground">{name}</p>
+      <div className="min-w-0 flex-1">
+        <p className="font-bold wrap-break-word text-foreground">{name}</p>
         <p className="mt-0.5 text-xs text-[#75716B]">{date}</p>
-        <p className="mt-3 text-sm leading-relaxed text-[#43403B]">{text}</p>
+        <p className="mt-3 text-sm leading-relaxed wrap-break-word text-[#43403B]">
+          {text}
+        </p>
       </div>
     </div>
   )

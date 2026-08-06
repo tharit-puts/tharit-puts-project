@@ -23,7 +23,7 @@ const navItems = [
   { label: 'Reset password', path: '/admin/reset-password', icon: RotateCcw },
 ]
 
-export function AdminSidebar() {
+export function AdminSidebar({ onNavigate, className = '' }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { logout } = useAuth()
@@ -31,11 +31,18 @@ export function AdminSidebar() {
   function handleLogout() {
     // logout ตัวเดียวกับฝั่งผู้ใช้ทั่วไป — ลบ JWT ทิ้งด้วย ไม่ใช่แค่ flag ใน localStorage
     logout()
+    onNavigate?.()
     navigate('/admin/login')
   }
 
+  function handleNavClick() {
+    onNavigate?.()
+  }
+
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-[#EFEEEB] bg-[#F9F8F6] px-4 py-6">
+    <aside
+      className={`flex h-full w-64 shrink-0 flex-col border-r border-[#EFEEEB] bg-[#F9F8F6] px-4 py-6 ${className}`}
+    >
       <div className="px-3">
         <img src={hhLogo} alt="hh." className="h-5 w-auto" />
         <p className="mt-3 text-sm font-medium text-[#EB6B47]">Admin panel</p>
@@ -52,6 +59,7 @@ export function AdminSidebar() {
             <Link
               key={path}
               to={path}
+              onClick={handleNavClick}
               className={`${navItemClassName} ${
                 isActive ? 'bg-[#EFEEEB] font-semibold text-foreground' : 'text-[#75716B]'
               }`}
@@ -66,6 +74,7 @@ export function AdminSidebar() {
       <div className="mt-auto flex flex-col gap-1 border-t border-[#EFEEEB] pt-4">
         <Link
           to="/"
+          onClick={handleNavClick}
           className={`${navItemClassName} text-[#75716B] hover:text-foreground`}
         >
           <ExternalLink className="h-4 w-4" />

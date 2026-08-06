@@ -68,19 +68,19 @@ export function AdminProfilePage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <div className="flex shrink-0 items-center justify-between border-b border-[#EFEEEB] px-8 py-6">
+      <div className="flex shrink-0 flex-col gap-4 border-b border-[#EFEEEB] px-4 py-5 sm:flex-row sm:items-center sm:justify-between md:px-8 md:py-6">
         <h1 className="text-2xl font-bold text-foreground">Profile</h1>
         <Button
           type="button"
           disabled={isSaving}
           onClick={handleSave}
-          className="h-11 rounded-full px-6 text-sm font-medium"
+          className="h-11 w-full rounded-full px-6 text-sm font-medium sm:w-auto"
         >
           {isSaving ? 'Saving...' : 'Save'}
         </Button>
       </div>
 
-      <div className="max-w-2xl px-8 py-10">
+      <div className="max-w-2xl px-4 py-8 md:px-8 md:py-10">
         <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <img

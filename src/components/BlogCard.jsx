@@ -45,15 +45,17 @@ export function BlogCard({
           {excerpt}
         </p>
 
-        <div className="mt-auto flex items-center gap-3">
+        <div className="mt-auto flex min-w-0 items-center gap-3">
           <img
             src={avatarSrc}
             alt={author}
             className="h-10 w-10 shrink-0 rounded-full object-cover"
           />
-          <span className="text-sm font-medium text-foreground">{author}</span>
-          <span className="h-4 w-px bg-[#DAD6D1]" aria-hidden="true" />
-          <time className="text-sm text-[#75716B]" dateTime={date}>
+          <span className="truncate text-sm font-medium text-foreground">
+            {author}
+          </span>
+          <span className="h-4 w-px shrink-0 bg-[#DAD6D1]" aria-hidden="true" />
+          <time className="shrink-0 text-sm text-[#75716B]" dateTime={date}>
             {date}
           </time>
         </div>

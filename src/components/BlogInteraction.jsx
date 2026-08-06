@@ -37,24 +37,26 @@ export function BlogInteraction({ initialCount }) {
   }
 
   return (
-    <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[#EFEEEB] px-6 py-4">
-      <button
-        type="button"
-        onClick={handleEmotionClick}
-        className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-medium text-[#43403B] transition-colors hover:bg-[#F9F8F6]"
-      >
-        <Smile className="h-5 w-5" />
-        {emotionCount}
-      </button>
+    <div className="mt-10 flex flex-col gap-4 rounded-2xl bg-[#EFEEEB] px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={handleEmotionClick}
+          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-medium text-[#43403B] transition-colors hover:bg-[#F9F8F6]"
+        >
+          <Smile className="h-5 w-5" />
+          {emotionCount}
+        </button>
 
-      <button
-        type="button"
-        onClick={handleCopyLink}
-        className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-medium text-[#43403B] transition-colors hover:bg-[#F9F8F6]"
-      >
-        <Copy className="h-4 w-4" />
-        Copy link
-      </button>
+        <button
+          type="button"
+          onClick={handleCopyLink}
+          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-medium text-[#43403B] transition-colors hover:bg-[#F9F8F6]"
+        >
+          <Copy className="h-4 w-4" />
+          Copy link
+        </button>
+      </div>
 
       <div className="flex items-center gap-3">
         {socialLinks.map(({ href, icon, label }) => (

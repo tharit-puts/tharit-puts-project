@@ -3,7 +3,7 @@ function BlogSection({ index, section }) {
   return (
     <div className="mt-10">
       {/* หัวข้อย่อย เช่น 1. Independent Yet Affectionate */}
-      <h2 className="text-2xl font-bold text-foreground">
+      <h2 className="text-xl font-bold wrap-break-word text-foreground sm:text-2xl">
         {index}. {section.title}
       </h2>
 
@@ -11,7 +11,7 @@ function BlogSection({ index, section }) {
       {section.paragraphs?.map((paragraph) => (
         <p
           key={paragraph.slice(0, 40)}
-          className="mt-4 text-base leading-relaxed text-[#43403B]"
+          className="mt-4 text-base leading-relaxed wrap-break-word text-[#43403B]"
         >
           {paragraph}
         </p>
@@ -23,7 +23,7 @@ function BlogSection({ index, section }) {
           {section.bullets.map((bullet) => (
             <li
               key={bullet.label}
-              className="text-base leading-relaxed text-[#43403B]"
+              className="text-base leading-relaxed wrap-break-word text-[#43403B]"
             >
               <span className="font-bold">{bullet.label}:</span> {bullet.text}
             </li>
@@ -33,7 +33,7 @@ function BlogSection({ index, section }) {
 
       {/* ย่อหน้าปิดท้ายของหัวข้อ (ถ้ามี) */}
       {section.closing && (
-        <p className="mt-4 text-base leading-relaxed text-[#43403B]">
+        <p className="mt-4 text-base leading-relaxed wrap-break-word text-[#43403B]">
           {section.closing}
         </p>
       )}
