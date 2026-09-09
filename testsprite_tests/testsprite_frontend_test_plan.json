@@ -1,0 +1,929 @@
+[
+  {
+    "id": "TC001",
+    "title": "Log in with valid credentials",
+    "description": "A visitor can sign in with valid credentials and start an authenticated session.",
+    "category": "User Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email or username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the authenticated session starts"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Sign up with a new account",
+    "description": "A visitor can create a new account and reach the registration success confirmation page.",
+    "category": "User Registration",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /signup"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with a new display name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with a unique username"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with a unique email address"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with a valid password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a registration success confirmation is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Read a published article with author details",
+    "description": "A visitor can open an article, read the full content, and view the author information while on the detail page.",
+    "category": "Read Article Detail",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open a published article from the feed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the full article content is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the author information is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Open an article from the home feed",
+    "description": "A visitor can open an article card from the home page and read the full article detail page.",
+    "category": "Browse and Search Articles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click an article card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the full article detail page is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Browse the home feed by category and search",
+    "description": "A visitor can filter the home feed by category and keyword and see the article list update accordingly.",
+    "category": "Browse and Search Articles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Select a category filter"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the search field with a keyword"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the article list updates to match the selected filters"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Like an article from the detail page",
+    "description": "A visitor can open an article detail page and like the post successfully.",
+    "category": "Read Article Detail",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open a published article from the feed"
+      },
+      {
+        "type": "action",
+        "description": "Click the like control"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the post shows a liked state"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Comment on an article while signed in",
+    "description": "A logged-in user can open an article, submit a comment, and see it appear in the discussion.",
+    "category": "Read Article Detail",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Open a published article from the feed"
+      },
+      {
+        "type": "action",
+        "description": "Type a comment into the comment field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the comment"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new comment appears in the discussion"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Prompt for login when commenting while signed out",
+    "description": "A visitor who tries to comment on an article sees a prompt to log in before they can post.",
+    "category": "Read Article Detail",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open a published article from the feed"
+      },
+      {
+        "type": "action",
+        "description": "Type a comment into the comment field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the comment"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a login prompt is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Publish a new article",
+    "description": "A logged-in user can create a new article and publish it successfully so the article is available as published.",
+    "category": "Create Article",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /my-articles/new"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the title field with Published article for testing"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the description field with Published description for testing"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the content field with a markdown article that includes the required heading format"
+      },
+      {
+        "type": "action",
+        "description": "Select a category"
+      },
+      {
+        "type": "action",
+        "description": "Set an image for the article"
+      },
+      {
+        "type": "action",
+        "description": "Publish the article"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the article is shown as published"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Create and save a draft article",
+    "description": "A logged-in user can create a new article and save it as a draft with the saved article remaining in draft state.",
+    "category": "Create Article",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /my-articles/new"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the title field with Draft article for testing"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the description field with Draft description for testing"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the content field with a markdown article that includes the required heading format"
+      },
+      {
+        "type": "action",
+        "description": "Select a category"
+      },
+      {
+        "type": "action",
+        "description": "Set an image for the article"
+      },
+      {
+        "type": "action",
+        "description": "Save the article as a draft"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the saved article is shown in draft state"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Move through article pagination",
+    "description": "A visitor can use pagination on the home feed to load additional published articles.",
+    "category": "Browse and Search Articles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the pagination controls"
+      },
+      {
+        "type": "action",
+        "description": "Click the next page control"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a different set of articles is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Update profile details successfully",
+    "description": "A logged-in user can change their profile name, username, or avatar and see the updated profile information saved.",
+    "category": "Profile Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /profile"
+      },
+      {
+        "type": "action",
+        "description": "Edit the name field"
+      },
+      {
+        "type": "action",
+        "description": "Edit the username field"
+      },
+      {
+        "type": "action",
+        "description": "Change the avatar"
+      },
+      {
+        "type": "action",
+        "description": "Save the profile changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated profile information is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Update an existing article from the management list",
+    "description": "A logged-in user can open one of their articles from the management list, edit it, and see the updated article reflected in the list.",
+    "category": "Edit / Manage Articles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /my-articles"
+      },
+      {
+        "type": "action",
+        "description": "Open one of the user's existing articles for editing"
+      },
+      {
+        "type": "action",
+        "description": "Change the article title"
+      },
+      {
+        "type": "action",
+        "description": "Save the article changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the article list reflects the updated article"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "Change password successfully",
+    "description": "A logged-in user can confirm their current password, enter a new password, and complete the password change.",
+    "category": "Reset Password",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /reset-password"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the current password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the new password field with a valid new password"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the confirm new password field with the same valid new password"
+      },
+      {
+        "type": "action",
+        "description": "Save the password change"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a password update confirmation is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "Delete an article from the management list",
+    "description": "A logged-in user can delete one of their articles after confirming the action and see it removed from the list.",
+    "category": "Edit / Manage Articles",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /my-articles"
+      },
+      {
+        "type": "action",
+        "description": "Open one of the user's existing articles for editing"
+      },
+      {
+        "type": "action",
+        "description": "Delete the article"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the article is removed from the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC016",
+    "title": "Reject duplicate registration details",
+    "description": "A visitor sees an error when trying to register with a username or email that is already taken.",
+    "category": "User Registration",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /signup"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with a display name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with an already used username"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with an already used email address"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with a valid password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a duplicate account error is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC017",
+    "title": "Show validation when required article fields are missing",
+    "description": "Submitting a new article with required information missing shows validation feedback and does not create the article.",
+    "category": "Create Article",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /my-articles/new"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the title field with Validation test article"
+      },
+      {
+        "type": "action",
+        "description": "Submit the article without completing all required fields"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation errors are visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the article is not created"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC018",
+    "title": "Reject invalid login credentials",
+    "description": "A visitor sees an error when signing in with incorrect credentials.",
+    "category": "User Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email or username field with an invalid username or email"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with an invalid password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an invalid credentials error is visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC019",
+    "title": "Block publishing when article content lacks required headings",
+    "description": "Publishing an article with invalid markdown structure shows validation feedback and prevents publication.",
+    "category": "Create Article",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /my-articles/new"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the title field with Heading validation article"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the description field with Heading validation description"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the content field with article content that does not include the required heading format"
+      },
+      {
+        "type": "action",
+        "description": "Select a category"
+      },
+      {
+        "type": "action",
+        "description": "Set an image for the article"
+      },
+      {
+        "type": "action",
+        "description": "Publish the article"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a publish validation error is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the article is not published"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC020",
+    "title": "View unread notification count",
+    "description": "This verifies that an admin can open the notifications area and see their unread notification count reflected in the UI.",
+    "category": "Notifications",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to the notifications area"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a notification unread count badge is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the notification feed is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC021",
+    "title": "Create a new category in admin settings",
+    "description": "An admin can create a category and see it appear in the category list.",
+    "category": "Category Management (Admin)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin/categories"
+      },
+      {
+        "type": "action",
+        "description": "Open the new category form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the category name with Testing category"
+      },
+      {
+        "type": "action",
+        "description": "Save the category"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new category appears in the list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC022",
+    "title": "Mark all notifications as read",
+    "description": "This verifies that an admin can mark all notifications as read and see the unread count clear in the UI.",
+    "category": "Notifications",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to the notifications area"
+      },
+      {
+        "type": "action",
+        "description": "Open the notification area"
+      },
+      {
+        "type": "action",
+        "description": "Click the control to mark all notifications as read"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the unread count badge is cleared"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the notification items are shown as read"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC023",
+    "title": "Show a duplicate username error on profile save",
+    "description": "A logged-in user who tries to save a username already in use sees a validation error and no profile update is completed.",
+    "category": "Profile Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /profile"
+      },
+      {
+        "type": "action",
+        "description": "Edit the username field with a username that is already taken"
+      },
+      {
+        "type": "action",
+        "description": "Save the profile changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a duplicate username error is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC024",
+    "title": "Edit an existing admin category",
+    "description": "An admin can change an existing category name and see the updated category in the list.",
+    "category": "Category Management (Admin)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin/categories"
+      },
+      {
+        "type": "action",
+        "description": "Open an existing category for editing"
+      },
+      {
+        "type": "action",
+        "description": "Change the category name"
+      },
+      {
+        "type": "action",
+        "description": "Save the category changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated category appears in the list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC025",
+    "title": "Show a password mismatch error",
+    "description": "A logged-in user who enters mismatched new passwords on the password reset page sees a validation error and cannot complete the change.",
+    "category": "Reset Password",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /reset-password"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the current password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the new password field with one valid password"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the confirm new password field with a different valid password"
+      },
+      {
+        "type": "action",
+        "description": "Save the password change"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a password mismatch error is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC026",
+    "title": "Delete an unused admin category",
+    "description": "An admin can delete a category after confirming the action and see it removed from the list when it is not in use.",
+    "category": "Category Management (Admin)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin/categories"
+      },
+      {
+        "type": "action",
+        "description": "Open an existing unused category for deletion"
+      },
+      {
+        "type": "action",
+        "description": "Delete the category"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the category is removed from the list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC027",
+    "title": "Show an error when deleting a category that is in use",
+    "description": "An admin sees an error when attempting to delete a category that is still assigned to posts, and the category remains available.",
+    "category": "Category Management (Admin)",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin/categories"
+      },
+      {
+        "type": "action",
+        "description": "Open a category that is already used by posts for deletion"
+      },
+      {
+        "type": "action",
+        "description": "Delete the category"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an error message is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the category remains in the list"
+      }
+    ],
+    "priority": "Low"
+  }
+]
